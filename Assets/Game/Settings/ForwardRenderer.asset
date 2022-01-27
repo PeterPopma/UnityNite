@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 1
   settings:
-    strength: 1.045
+    strength: 0.47
     rgbSplit: 0.896
     shadowMask: 0.64
     texture: {fileID: 2800000, guid: f2c40b951cee11943a1f6d5ec1b42f2c, type: 3}
-    scale: 5.11
-    speed: 0.0323
+    scale: 10
+    speed: 0.019
     waterLevel: 1
     depth: {x: 0, y: 10}
     fade: 0.735
