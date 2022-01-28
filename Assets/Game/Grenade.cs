@@ -4,10 +4,11 @@ using UnityEngine;
 
 public class Grenade : MonoBehaviour
 {
-    [SerializeField] private Transform vfxHit;
-    private Rigidbody myRigidbody;
     public float angularVelocity = 10000.0f;
+    public float lifeTime = 0.4f;
+    [SerializeField] private Transform vfxExplosion;
     private Vector3 axisOfRotation;
+    private Rigidbody myRigidbody;
 
     // Start is called before the first frame update
     void Start()
@@ -19,12 +20,27 @@ public class Grenade : MonoBehaviour
         velocity.y = 10f;
         myRigidbody.velocity = velocity;
         //axisOfRotation = Random.onUnitSphere;
-        axisOfRotation = new Vector3(1, 0, 0);
+        axisOfRotation = new Vector3(1, 0.2f, 0.2f);
     }
 
     // Update is called once per frame
     void Update()
     {
         transform.Rotate(axisOfRotation, angularVelocity * Time.smoothDeltaTime);
+
+        lifeTime -= Time.deltaTime;
+        if (lifeTime < 0f)
+        {
+            Instantiate(vfxExplosion, transform.position, Quaternion.identity);
+            Destroy(this.gameObject);
+        }
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (!other.tag.Equals("Player") && !other.tag.Equals("Projectile"))
+        {
+            Destroy(gameObject);
+        }
     }
 }

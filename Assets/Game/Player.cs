@@ -4,6 +4,7 @@ using UnityEngine;
 using Cinemachine;
 using StarterAssets;
 using UnityEngine.UI;
+using TMPro;
 
 public class Player : MonoBehaviour
 {
@@ -18,6 +19,7 @@ public class Player : MonoBehaviour
     [SerializeField] private Transform pfShell;
     [SerializeField] private Transform pfFire;
     [SerializeField] private Transform pfRunSmoke;
+    [SerializeField] private GameObject bulletTrail;
     [SerializeField] private Transform spawnBulletPosition;
     [SerializeField] private Transform spawnGrenadePosition;
     [SerializeField] private Transform spawnFirePosition;
@@ -31,7 +33,9 @@ public class Player : MonoBehaviour
     private bool throwingGrenade = false;
     private bool thrownGrenade = false;
     private int activeWeapon = 0;
+    private TextMeshProUGUI textScore;
     Vector3 aimDirection;
+    private int score = 0;
 
     private ThirdPersonController thirdPersonController;
     private StarterAssetsInputs starterAssetsInputs;
@@ -41,6 +45,7 @@ public class Player : MonoBehaviour
         thirdPersonController = GetComponent<ThirdPersonController>();
         starterAssetsInputs = GetComponent<StarterAssetsInputs>();
         animator = GetComponent<Animator>();
+        textScore = GameObject.Find("/Canvas/Score").GetComponent<TextMeshProUGUI>();
         activeWeapon = 0;
     }
 
@@ -51,9 +56,16 @@ public class Player : MonoBehaviour
 
         Vector2 screenCenterPoint = new Vector2(Screen.width / 2f, Screen.height / 2f);
         Ray ray = Camera.main.ScreenPointToRay(screenCenterPoint);
+        Transform hitTransForm = null;
         if (Physics.Raycast(ray, out RaycastHit raycastHit, 9999f, aimColliderLayerMask))
         {
+            hitTransForm = raycastHit.transform;
             mouseWorldPosition = raycastHit.point;
+        }
+        else
+        {
+            // we didn't hit anything, so take a point in the direction of the ray
+            mouseWorldPosition = ray.GetPoint(20);
         }
 
         Vector3 worldAimTarget = mouseWorldPosition;
@@ -145,14 +157,42 @@ public class Player : MonoBehaviour
         if (starterAssetsInputs.shoot)
         {
             starterAssetsInputs.shoot = false;
-            if (activeWeapon == 0) {
+            animator.SetLayerWeight(1, 0f);
+            animator.SetLayerWeight(2, 1f);
+            animator.SetLayerWeight(3, 0f);
+            if (activeWeapon == 0) 
+            {
                 soundGunshot.Play();
-//                Instantiate(pfBullet, spawnBulletPosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
                 Instantiate(pfShell, spawnBulletPosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
                 Instantiate(pfFire, spawnFirePosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
-                animator.SetLayerWeight(1, 0f);
-                animator.SetLayerWeight(2, 1f);
-                animator.SetLayerWeight(3, 0f);
+                // add bullet trail
+                var scriptInstance = Instantiate(bulletTrail, spawnBulletPosition.position, Quaternion.LookRotation(aimDirection, Vector3.up)).GetComponent<BulletProjectileRaycast>();
+                if (scriptInstance != null)
+                {
+                    scriptInstance.Setup(mouseWorldPosition);
+                }
+                if (hitTransForm!=null)
+                {
+                    if (hitTransForm.GetComponent<BulletTarget>() != null)
+                    {
+                        Rigidbody rigidbody = hitTransForm.gameObject.GetComponent<Rigidbody>();
+                        rigidbody.AddExplosionForce(500f, new Vector3(hitTransForm.transform.position.x, hitTransForm.transform.position.y, hitTransForm.transform.position.z), 3f);
+                        Vector3 randomRotation = new Vector3(Random.Range(30f, 600f), Random.Range(30f, 600f), Random.Range(30f, 600f));
+                        rigidbody.AddRelativeTorque(randomRotation, ForceMode.Impulse);
+                        rigidbody.useGravity = true;
+                        score++;
+                        textScore.text = "Score: " + score.ToString("00000");
+
+
+//                        BulletProjectileRaycast scriptInstance = Instantiate(pfBulletTrail).GetComponent<>("BulletProjectileRaycast");
+  //                      scriptInstance.Setup(hitTransForm.position);
+                    }
+                }
+            }
+            if (activeWeapon == 1)
+            {
+                //                Instantiate(pfBullet, spawnBulletPosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
+
             }
         }
         else

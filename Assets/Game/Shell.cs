@@ -4,10 +4,11 @@ using UnityEngine;
 
 public class Shell : MonoBehaviour
 {
-    private Rigidbody myRigidbody;
     public float angularVelocity = 100.0f;
+    private Rigidbody myRigidbody;
     private Vector3 axisOfRotation;
     private AudioSource soundShell;
+
     private void Awake()
     {
         myRigidbody = GetComponent<Rigidbody>();

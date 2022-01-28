@@ -455,8 +455,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3151cb50897d414b9a81da3ce942456, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  vfxHit: {fileID: 0}
   angularVelocity: 10000
+  lifeTime: 3
+  vfxExplosion: {fileID: 400002, guid: 6ecf76dc4f268d340b2666896a954bcc, type: 3}
 --- !u!65 &8581276231698906787
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -464,11 +465,11 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 100010}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_Material: {fileID: 13400000, guid: f516f73de29e78a4da943414e3a6e7d0, type: 2}
+  m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
+  m_Size: {x: 0.1, y: 0.1, z: 0.1}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!54 &3460673401249355629
 Rigidbody:
