@@ -13,9 +13,9 @@ namespace StarterAssets
 		public bool jump;
 		public bool sprint;
 		public bool aim;
-		public bool shoot;
 		public bool grenade;
 		public bool toggleWeapon;
+		public bool shoot;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -34,7 +34,7 @@ namespace StarterAssets
 
 		public void OnLook(InputValue value)
 		{
-			if (cursorInputForLook)
+			if(cursorInputForLook)
 			{
 				LookInput(value.Get<Vector2>());
 			}
@@ -68,16 +68,15 @@ namespace StarterAssets
 		{
 			ToggleWeaponInput(value.isPressed);
 		}
-
 #else
-		// old input sys if we do decide to have it (most likely wont)...
+	// old input sys if we do decide to have it (most likely wont)...
 #endif
 
 
 		public void MoveInput(Vector2 newMoveDirection)
 		{
 			move = newMoveDirection;
-		}
+		} 
 
 		public void LookInput(Vector2 newLookDirection)
 		{
@@ -93,7 +92,6 @@ namespace StarterAssets
 		{
 			sprint = newSprintState;
 		}
-
 		public void AimInput(bool newAimState)
 		{
 			aim = newAimState;
@@ -114,6 +112,7 @@ namespace StarterAssets
 			toggleWeapon = newToggleWeaponState;
 		}
 
+
 #if !UNITY_IOS || !UNITY_ANDROID
 
 		private void OnApplicationFocus(bool hasFocus)
@@ -129,5 +128,5 @@ namespace StarterAssets
 #endif
 
 	}
-
+	
 }

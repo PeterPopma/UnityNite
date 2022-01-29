@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class Grenade : MonoBehaviour
 {
-    public float angularVelocity = 10000.0f;
-    public float lifeTime = 0.4f;
+    [SerializeField] float angularVelocity = 10000.0f;
+    [SerializeField] float lifeTime = 0.4f;
     [SerializeField] private Transform vfxExplosion;
+    private AudioSource soundGrenadeExplosion;
     private Vector3 axisOfRotation;
     private Rigidbody myRigidbody;
 
@@ -17,10 +18,11 @@ public class Grenade : MonoBehaviour
         myRigidbody = GetComponent<Rigidbody>();
         float speed = 20f;
         Vector3 velocity = transform.forward * speed;
-        velocity.y = 10f;
+//        velocity.y = 10f;
         myRigidbody.velocity = velocity;
         //axisOfRotation = Random.onUnitSphere;
         axisOfRotation = new Vector3(1, 0.2f, 0.2f);
+        soundGrenadeExplosion = GameObject.Find("/Sound/Grenade").GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -31,16 +33,10 @@ public class Grenade : MonoBehaviour
         lifeTime -= Time.deltaTime;
         if (lifeTime < 0f)
         {
+            soundGrenadeExplosion.Play();
             Instantiate(vfxExplosion, transform.position, Quaternion.identity);
             Destroy(this.gameObject);
         }
     }
 
-    void OnTriggerEnter(Collider other)
-    {
-        if (!other.tag.Equals("Player") && !other.tag.Equals("Projectile"))
-        {
-            Destroy(gameObject);
-        }
-    }
 }

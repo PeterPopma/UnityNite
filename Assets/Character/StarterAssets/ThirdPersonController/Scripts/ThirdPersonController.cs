@@ -53,9 +53,9 @@ namespace StarterAssets
 		[Tooltip("The follow target set in the Cinemachine Virtual Camera that the camera will follow")]
 		public GameObject CinemachineCameraTarget;
 		[Tooltip("How far in degrees can you move the camera up")]
-		public float TopClamp = 90.0f;
+		public float TopClamp = 70.0f;
 		[Tooltip("How far in degrees can you move the camera down")]
-		public float BottomClamp = -90.0f;
+		public float BottomClamp = -30.0f;
 		[Tooltip("Additional degress to override the camera. Useful for fine tuning camera position when locked")]
 		public float CameraAngleOverride = 0.0f;
 		[Tooltip("For locking the camera position on all axis")]
@@ -118,7 +118,7 @@ namespace StarterAssets
 		private void Update()
 		{
 			_hasAnimator = TryGetComponent(out _animator);
-
+			
 			JumpAndGravity();
 			GroundedCheck();
 			Move();
@@ -156,8 +156,8 @@ namespace StarterAssets
 			// if there is an input and camera position is not fixed
 			if (_input.look.sqrMagnitude >= _threshold && !LockCameraPosition)
 			{
-				_cinemachineTargetYaw += _input.look.x * Time.deltaTime * Sensitivity;
-				_cinemachineTargetPitch += _input.look.y * Time.deltaTime * Sensitivity;
+				_cinemachineTargetYaw += _input.look.x * Time.deltaTime;
+				_cinemachineTargetPitch += _input.look.y * Time.deltaTime;
 			}
 
 			// clamp our rotations so our values are limited 360 degrees
@@ -312,7 +312,7 @@ namespace StarterAssets
 
 			if (Grounded) Gizmos.color = transparentGreen;
 			else Gizmos.color = transparentRed;
-
+			
 			// when selected, draw a gizmo in the position of, and matching radius of, the grounded collider
 			Gizmos.DrawSphere(new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z), GroundedRadius);
 		}

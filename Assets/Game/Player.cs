@@ -15,16 +15,18 @@ public class Player : MonoBehaviour
     [SerializeField] private Image crosshairWalk;
     [SerializeField] private LayerMask aimColliderLayerMask = new LayerMask();
     [SerializeField] private Transform pfGrenade;
-    [SerializeField] private Transform pfBullet;
+    [SerializeField] private Transform pfRocket;
     [SerializeField] private Transform pfShell;
     [SerializeField] private Transform pfFire;
     [SerializeField] private Transform pfRunSmoke;
+    [SerializeField] private Transform pfRocketSmoke;
     [SerializeField] private GameObject bulletTrail;
     [SerializeField] private Transform spawnBulletPosition;
     [SerializeField] private Transform spawnGrenadePosition;
     [SerializeField] private Transform spawnFirePosition;
     [SerializeField] private Transform spawnRunSmokePosition;
     [SerializeField] private AudioSource soundGunshot;
+    [SerializeField] private AudioSource soundRocketLauncher;
     [SerializeField] private GameObject[] weapons;
 
     private Animator animator;
@@ -65,14 +67,19 @@ public class Player : MonoBehaviour
         else
         {
             // we didn't hit anything, so take a point in the direction of the ray
-            mouseWorldPosition = ray.GetPoint(20);
+            mouseWorldPosition = ray.GetPoint(300);
         }
 
         Vector3 worldAimTarget = mouseWorldPosition;
         worldAimTarget.y = transform.position.y;
         aimDirection = (worldAimTarget - transform.position).normalized;
 
+        // Turn player towards aim point (only x and z axis)
         transform.forward = Vector3.Lerp(transform.forward, aimDirection, Time.deltaTime * 20f);
+        
+        // Set aimdirection (including y axis)
+        aimDirection = (mouseWorldPosition - transform.position).normalized;
+
         if (starterAssetsInputs.aim)
         {
             aimVirtualCamera.gameObject.SetActive(true);
@@ -192,7 +199,9 @@ public class Player : MonoBehaviour
             if (activeWeapon == 1)
             {
                 //                Instantiate(pfBullet, spawnBulletPosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
-
+                soundRocketLauncher.Play();
+                Instantiate(pfRocket, spawnGrenadePosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
+                Instantiate(pfRocketSmoke, transform.position, Quaternion.identity);
             }
         }
         else

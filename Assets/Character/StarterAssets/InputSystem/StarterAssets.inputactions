@@ -44,7 +44,7 @@
                 {
                     "name": "Aim",
                     "type": "PassThrough",
-                    "id": "f288b9c2-0690-434a-939d-7a2da256aa22",
+                    "id": "32df55f3-b3c4-4a7b-84dd-2ec98bb085fe",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -53,7 +53,7 @@
                 {
                     "name": "Shoot",
                     "type": "Button",
-                    "id": "91875b37-6b82-45cb-8f48-dd052c9c054b",
+                    "id": "e3ed243d-fc7a-491b-810b-9955df954cb1",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -62,7 +62,7 @@
                 {
                     "name": "Grenade",
                     "type": "Button",
-                    "id": "22d7ebf2-4e14-4aa9-96b9-455d154ccb5f",
+                    "id": "17858d42-04dc-4cd9-9259-866720e6006e",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -71,7 +71,7 @@
                 {
                     "name": "ToggleWeapon",
                     "type": "Button",
-                    "id": "c4f90e48-2bad-4021-835a-7bd78932b6cd",
+                    "id": "c70f52dd-63e0-4fbf-a6fa-be6415cc9394",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -257,7 +257,7 @@
                 },
                 {
                     "name": "",
-                    "id": "71651e8f-b220-448c-a74b-142a904a1ca0",
+                    "id": "cd5207c1-7642-4d69-b7ff-1a07a161f298",
                     "path": "<Mouse>/rightButton",
                     "interactions": "",
                     "processors": "",
@@ -268,7 +268,7 @@
                 },
                 {
                     "name": "",
-                    "id": "4f709e61-5c3b-4f91-a25e-2b991dfbf7fb",
+                    "id": "22305a49-4393-4df8-b821-2cf0f39976c9",
                     "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
@@ -279,7 +279,7 @@
                 },
                 {
                     "name": "",
-                    "id": "b7c36b01-61b4-46a6-bb99-63c8beea20bf",
+                    "id": "1da33001-3237-417a-a9f5-8c0e2f78b78c",
                     "path": "<Keyboard>/backquote",
                     "interactions": "",
                     "processors": "",
@@ -290,7 +290,7 @@
                 },
                 {
                     "name": "",
-                    "id": "085f0769-88b8-485a-b38d-a95352ee9793",
+                    "id": "1cf8beb2-6eda-449a-85f9-2d0086ee945c",
                     "path": "<Keyboard>/tab",
                     "interactions": "",
                     "processors": "",

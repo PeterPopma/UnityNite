@@ -7,10 +7,15 @@ public class BulletProjectileRaycast : MonoBehaviour
 {
     [SerializeField] private Transform vfxHit;
     private Vector3 targetPosition;
+    private Vector3 moveDir;
+    private Vector3 hitDir;
+    private float moveSpeed;
 
     public void Setup(Vector3 targetPosition)
     {
         this.targetPosition = targetPosition;
+        moveDir = (targetPosition - transform.position).normalized;
+        moveSpeed = 500f;
     }
 
     // Update is called once per frame
@@ -18,8 +23,6 @@ public class BulletProjectileRaycast : MonoBehaviour
     {
         float distanceBefore = Vector3.Distance(transform.position, targetPosition);
 
-        Vector3 moveDir = (targetPosition - transform.position).normalized;
-        float moveSpeed = 200f;
         transform.position += moveDir * moveSpeed * Time.deltaTime;
 
         float distanceAfter = Vector3.Distance(transform.position, targetPosition);

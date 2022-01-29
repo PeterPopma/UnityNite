@@ -22,7 +22,7 @@ public class BulletProjectile : MonoBehaviour
     {
         float speed = 80f;
         myRigidbody.velocity = transform.forward * speed;
-        transform.Rotate(Vector3.left, 90);
+//        transform.Rotate(Vector3.left, 90);
     }
 
     void OnTriggerEnter(Collider other)
