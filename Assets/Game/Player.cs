@@ -4,10 +4,12 @@ using UnityEngine;
 using Cinemachine;
 using StarterAssets;
 using UnityEngine.UI;
+using UnityEngine.Animations.Rigging;
 using TMPro;
 
 public class Player : MonoBehaviour
 {
+    [SerializeField] private Rig aimRig;
     [SerializeField] private CinemachineVirtualCamera aimVirtualCamera;
     [SerializeField] private float normalSensitivity;
     [SerializeField] private float aimSensitivity;
@@ -23,11 +25,13 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject bulletTrail;
     [SerializeField] private Transform spawnBulletPosition;
     [SerializeField] private Transform spawnGrenadePosition;
+    [SerializeField] private Transform spawnRocketPosition;
     [SerializeField] private Transform spawnFirePosition;
     [SerializeField] private Transform spawnRunSmokePosition;
     [SerializeField] private AudioSource soundGunshot;
     [SerializeField] private AudioSource soundRocketLauncher;
     [SerializeField] private GameObject[] weapons;
+    [SerializeField] private Transform hitPosition;
 
     private Animator animator;
     private float timeLastRunSmoke;
@@ -38,6 +42,7 @@ public class Player : MonoBehaviour
     private TextMeshProUGUI textScore;
     Vector3 aimDirection;
     private int score = 0;
+    private float aimRigWeight;
 
     private ThirdPersonController thirdPersonController;
     private StarterAssetsInputs starterAssetsInputs;
@@ -70,6 +75,8 @@ public class Player : MonoBehaviour
             mouseWorldPosition = ray.GetPoint(300);
         }
 
+        hitPosition.position = mouseWorldPosition;
+
         Vector3 worldAimTarget = mouseWorldPosition;
         worldAimTarget.y = transform.position.y;
         aimDirection = (worldAimTarget - transform.position).normalized;
@@ -84,15 +91,30 @@ public class Player : MonoBehaviour
         {
             aimVirtualCamera.gameObject.SetActive(true);
             thirdPersonController.SetSensitivity(aimSensitivity);
-            crosshairAim.gameObject.SetActive(true);
+            if (activeWeapon == 0)
+            { 
+                crosshairAim.gameObject.SetActive(true);
+            }
             crosshairWalk.gameObject.SetActive(false);
             if (!throwingGrenade)
             {
-                animator.SetLayerWeight(1, Mathf.Lerp(animator.GetLayerWeight(1), 1f, Time.deltaTime * 10f));
+                aimRigWeight = 1f;
+                if (starterAssetsInputs.move.y>0)
+                {
+                    // aim-run
+                    animator.SetLayerWeight(4, Mathf.Lerp(animator.GetLayerWeight(1), 1f, Time.deltaTime * 10f));
+                }
+                else
+                {
+                    // aim standing
+                    animator.SetLayerWeight(1, Mathf.Lerp(animator.GetLayerWeight(1), 1f, Time.deltaTime * 10f));
+                    animator.SetLayerWeight(4, 0f);
+                }
             }
         }
         else
         {
+            aimRigWeight = 0f;
             aimVirtualCamera.gameObject.SetActive(false);
             thirdPersonController.SetSensitivity(normalSensitivity);
             crosshairAim.gameObject.SetActive(false);
@@ -100,8 +122,11 @@ public class Player : MonoBehaviour
             if (!throwingGrenade)
             {
                 animator.SetLayerWeight(1, Mathf.Lerp(animator.GetLayerWeight(1), 0f, Time.deltaTime * 10f));
+                animator.SetLayerWeight(4, Mathf.Lerp(animator.GetLayerWeight(1), 0f, Time.deltaTime * 10f));
             }
         }
+
+        aimRig.weight = Mathf.Lerp(aimRig.weight, aimRigWeight, Time.deltaTime * 10f);
 
         if (starterAssetsInputs.move.magnitude > 0)
         {
@@ -114,14 +139,16 @@ public class Player : MonoBehaviour
 
         if (starterAssetsInputs.grenade)
         {
+            aimRig.weight = 0;
             timeLastGrenadeThrow = Time.time;
             throwingGrenade = true;
             weapons[activeWeapon].SetActive(false);
             starterAssetsInputs.grenade = false;
+            animator.Play("Throw", 3, 0f);
             animator.SetLayerWeight(1, 0f);
             animator.SetLayerWeight(2, 0f);
-            animator.Play("Throw", 3, 0f);
             animator.SetLayerWeight(3, 1f);
+            animator.SetLayerWeight(4, 0f);
         }
 
         if (starterAssetsInputs.toggleWeapon)
@@ -167,6 +194,7 @@ public class Player : MonoBehaviour
             animator.SetLayerWeight(1, 0f);
             animator.SetLayerWeight(2, 1f);
             animator.SetLayerWeight(3, 0f);
+            animator.SetLayerWeight(4, 0f);
             if (activeWeapon == 0) 
             {
                 soundGunshot.Play();
@@ -200,7 +228,7 @@ public class Player : MonoBehaviour
             {
                 //                Instantiate(pfBullet, spawnBulletPosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
                 soundRocketLauncher.Play();
-                Instantiate(pfRocket, spawnGrenadePosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
+                Instantiate(pfRocket, spawnRocketPosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
                 Instantiate(pfRocketSmoke, transform.position, Quaternion.identity);
             }
         }

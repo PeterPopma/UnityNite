@@ -24,7 +24,7 @@ public class Rocket : MonoBehaviour
     {
         float speed = 80f;
         Vector3 dirSpeed = transform.forward;
-        dirSpeed = Quaternion.Euler(-10, 0, 0) * dirSpeed;
+        dirSpeed = Quaternion.Euler(10, 0, 0) * dirSpeed;
         myRigidbody.velocity = dirSpeed * speed;
 //        transform.Rotate(Vector3.left, 90);
     }
