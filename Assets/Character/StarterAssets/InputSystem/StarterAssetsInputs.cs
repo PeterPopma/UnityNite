@@ -16,6 +16,9 @@ namespace StarterAssets
 		public bool grenade;
 		public bool toggleWeapon;
 		public bool shoot;
+		public bool stairs;
+		public bool wall;
+		public bool floor;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -68,6 +71,22 @@ namespace StarterAssets
 		{
 			ToggleWeaponInput(value.isPressed);
 		}
+
+		public void OnStairs(InputValue value)
+		{
+			StairsInput(value.isPressed);
+		}
+
+		public void OnWall(InputValue value)
+		{
+			WallInput(value.isPressed);
+		}
+
+		public void OnFloor(InputValue value)
+		{
+			FloorInput(value.isPressed);
+		}
+
 #else
 	// old input sys if we do decide to have it (most likely wont)...
 #endif
@@ -112,6 +131,20 @@ namespace StarterAssets
 			toggleWeapon = newToggleWeaponState;
 		}
 
+		public void StairsInput(bool newStairs)
+		{
+			stairs = newStairs;
+		}
+
+		public void WallInput(bool newWall)
+		{
+			wall = newWall;
+		}
+
+		public void FloorInput(bool newFloor)
+		{
+			floor = newFloor;
+		}
 
 #if !UNITY_IOS || !UNITY_ANDROID
 

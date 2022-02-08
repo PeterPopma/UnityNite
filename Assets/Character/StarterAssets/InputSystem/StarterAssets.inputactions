@@ -76,6 +76,33 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Stairs",
+                    "type": "Button",
+                    "id": "2e94d5cc-3109-454a-b550-3bcf3a6049ef",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Wall",
+                    "type": "Button",
+                    "id": "26491c55-3988-4b7d-a9c8-665cfb00affa",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Floor",
+                    "type": "Button",
+                    "id": "69952d24-062b-4b7c-84c4-95f447b1f0dd",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -280,7 +307,7 @@
                 {
                     "name": "",
                     "id": "1da33001-3237-417a-a9f5-8c0e2f78b78c",
-                    "path": "<Keyboard>/backquote",
+                    "path": "<Keyboard>/g",
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardMouse",
@@ -291,11 +318,44 @@
                 {
                     "name": "",
                     "id": "1cf8beb2-6eda-449a-85f9-2d0086ee945c",
-                    "path": "<Keyboard>/tab",
+                    "path": "<Keyboard>/t",
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardMouse",
                     "action": "ToggleWeapon",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "81564b5a-9f25-4f5d-a7af-e3983d03c031",
+                    "path": "<Keyboard>/backquote",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
+                    "action": "Stairs",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7c53d558-f611-4598-aa44-76c667ce06fd",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
+                    "action": "Wall",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "843b443b-d105-4c3b-a832-b3b497017e7d",
+                    "path": "<Keyboard>/capsLock",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Floor",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

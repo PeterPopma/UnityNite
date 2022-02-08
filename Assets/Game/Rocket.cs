@@ -40,7 +40,7 @@ public class Rocket : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.GetComponent<BulletTarget>() != null)
+        if (other.GetComponent<Target>() != null)
         {
             Rigidbody rigidbody = other.gameObject.GetComponent<Rigidbody>();
             rigidbody.AddExplosionForce(500f, new Vector3(other.transform.position.x, other.transform.position.y, other.transform.position.z), 3f);

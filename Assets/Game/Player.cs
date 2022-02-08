@@ -6,6 +6,7 @@ using StarterAssets;
 using UnityEngine.UI;
 using UnityEngine.Animations.Rigging;
 using TMPro;
+using System;
 
 public class Player : MonoBehaviour
 {
@@ -20,14 +21,19 @@ public class Player : MonoBehaviour
     [SerializeField] private Transform pfRocket;
     [SerializeField] private Transform pfShell;
     [SerializeField] private Transform pfFire;
+    [SerializeField] private Transform pfGunFireSmoke;
     [SerializeField] private Transform pfRunSmoke;
     [SerializeField] private Transform pfRocketSmoke;
+    [SerializeField] private Transform pfStairs;
+    [SerializeField] private Transform pfWall;
     [SerializeField] private GameObject bulletTrail;
     [SerializeField] private Transform spawnBulletPosition;
     [SerializeField] private Transform spawnGrenadePosition;
     [SerializeField] private Transform spawnRocketPosition;
     [SerializeField] private Transform spawnFirePosition;
     [SerializeField] private Transform spawnRunSmokePosition;
+    [SerializeField] private Transform spawnBulletSmokePosition;
+    [SerializeField] private Transform spawnBuildPosition;
     [SerializeField] private AudioSource soundGunshot;
     [SerializeField] private AudioSource soundRocketLauncher;
     [SerializeField] private GameObject[] weapons;
@@ -151,6 +157,61 @@ public class Player : MonoBehaviour
             animator.SetLayerWeight(4, 0f);
         }
 
+        if (starterAssetsInputs.stairs)
+        {
+            starterAssetsInputs.stairs = false;
+            double rotation = Math.Atan2(aimDirection.x, aimDirection.z) * 180 / Math.PI;
+            
+            Vector3 currentSquarePosition = new Vector3((float)(spawnBuildPosition.position.x - spawnBuildPosition.position.x % 4.0),
+                (float)(spawnBuildPosition.position.y - spawnBuildPosition.position.y % 4.0),
+                (float)(spawnBuildPosition.position.z - spawnBuildPosition.position.z % 4.0));
+
+            if (rotation > -45 && rotation <= 45)
+            {
+                Quaternion myQuaternion = Quaternion.Euler(Vector3.up * 90);
+                myQuaternion *= Quaternion.AngleAxis(45, -Vector3.forward);
+                Instantiate(pfStairs, currentSquarePosition, myQuaternion);
+            }
+            else if (rotation > 45 && rotation <= 135)
+            {
+                Instantiate(pfStairs, currentSquarePosition, Quaternion.AngleAxis(45, Vector3.forward));
+            }
+            else if (rotation > -135 && rotation <= -45)
+            {
+                Instantiate(pfStairs, currentSquarePosition, Quaternion.AngleAxis(45, -Vector3.forward));
+            }
+            else
+            {
+                Quaternion myQuaternion = Quaternion.Euler(Vector3.up * 90);
+                myQuaternion *= Quaternion.AngleAxis(45, Vector3.forward);
+                Instantiate(pfStairs, currentSquarePosition, myQuaternion);
+            }
+        }
+
+        if (starterAssetsInputs.wall)
+        {
+            starterAssetsInputs.wall = false;
+            double rotation = Math.Atan2(aimDirection.x, aimDirection.z) * 180 / Math.PI;
+            Vector3 buildPosition = spawnBuildPosition.position;// gameObject.transform.position;
+            Vector3 currentSquarePosition = new Vector3((float)(buildPosition.x - buildPosition.x % 4.0),
+                (float)(buildPosition.y - buildPosition.y % 4.0),
+                (float)(buildPosition.z - buildPosition.z % 4.0));
+
+            Instantiate(pfWall, currentSquarePosition, Quaternion.AngleAxis(90, Vector3.forward));
+        }
+
+        if (starterAssetsInputs.floor)
+        {
+            starterAssetsInputs.floor = false;
+            double rotation = Math.Atan2(aimDirection.x, aimDirection.z) * 180 / Math.PI;
+            Vector3 buildPosition = spawnBuildPosition.position;// gameObject.transform.position;
+            Vector3 currentSquarePosition = new Vector3((float)(buildPosition.x - buildPosition.x % 4.0),
+                (float)(buildPosition.y - buildPosition.y % 4.0),
+                (float)(buildPosition.z - buildPosition.z % 4.0));
+
+            Instantiate(pfWall, currentSquarePosition, Quaternion.Euler(0, 0, 0));
+        }
+
         if (starterAssetsInputs.toggleWeapon)
         {
             starterAssetsInputs.toggleWeapon = false;
@@ -200,27 +261,36 @@ public class Player : MonoBehaviour
                 soundGunshot.Play();
                 Instantiate(pfShell, spawnBulletPosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
                 Instantiate(pfFire, spawnFirePosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
+                Instantiate(pfGunFireSmoke, spawnBulletSmokePosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
                 // add bullet trail
-                var scriptInstance = Instantiate(bulletTrail, spawnBulletPosition.position, Quaternion.LookRotation(aimDirection, Vector3.up)).GetComponent<BulletProjectileRaycast>();
-                if (scriptInstance != null)
-                {
-                    scriptInstance.Setup(mouseWorldPosition);
-                }
+//                var scriptInstance = Instantiate(bulletTrail, spawnBulletPosition.position, Quaternion.LookRotation(aimDirection, Vector3.up)).GetComponent<BulletProjectileRaycast>();
+//                if (scriptInstance != null)
+//                {
+//                    scriptInstance.Setup(mouseWorldPosition);
+//                }
                 if (hitTransForm!=null)
                 {
-                    if (hitTransForm.GetComponent<BulletTarget>() != null)
+                    if (hitTransForm.GetComponent<Target>() != null)
                     {
                         Rigidbody rigidbody = hitTransForm.gameObject.GetComponent<Rigidbody>();
-                        rigidbody.AddExplosionForce(500f, new Vector3(hitTransForm.transform.position.x, hitTransForm.transform.position.y, hitTransForm.transform.position.z), 3f);
-                        Vector3 randomRotation = new Vector3(Random.Range(30f, 600f), Random.Range(30f, 600f), Random.Range(30f, 600f));
+                        rigidbody.constraints = RigidbodyConstraints.None;
+                        rigidbody.AddExplosionForce(700f, new Vector3(hitTransForm.transform.position.x, hitTransForm.transform.position.y, hitTransForm.transform.position.z), 3f);
+                        Vector3 randomRotation = new Vector3(UnityEngine.Random.Range(30f, 600f), UnityEngine.Random.Range(30f, 600f), UnityEngine.Random.Range(30f, 600f));
                         rigidbody.AddRelativeTorque(randomRotation, ForceMode.Impulse);
                         rigidbody.useGravity = true;
+                    }
+                    if (hitTransForm.GetComponent<Enemy>() != null && hitTransForm.gameObject.GetComponent<Rigidbody>()==null)
+                    {
+                        Enemy enemy = hitTransForm.gameObject.GetComponent<Enemy>();
+                        enemy.IsHit = true;
+                        Rigidbody rigidbody = hitTransForm.gameObject.AddComponent<Rigidbody>();
+                        rigidbody.mass = 0.1f;
+                        rigidbody.AddExplosionForce(120f, new Vector3(hitTransForm.transform.position.x, hitTransForm.transform.position.y - 1, hitTransForm.transform.position.z), 4f);
+                        Vector3 randomRotation = new Vector3(UnityEngine.Random.Range(1300f, 3000f), UnityEngine.Random.Range(0f, 0f), UnityEngine.Random.Range(1300f, 3000f));
+                        rigidbody.AddTorque(randomRotation, ForceMode.Force);
+                        rigidbody.useGravity = true;
                         score++;
-                        textScore.text = "Score: " + score.ToString("00000");
-
-
-//                        BulletProjectileRaycast scriptInstance = Instantiate(pfBulletTrail).GetComponent<>("BulletProjectileRaycast");
-  //                      scriptInstance.Setup(hitTransForm.position);
+                        textScore.text = "Kills: " + score.ToString();
                     }
                 }
             }
