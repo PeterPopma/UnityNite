@@ -24,7 +24,7 @@ public class Title : MonoBehaviour
 
         if (timePassed < 5f)
         {
-            strength = (timePassed - 2) * 200;
+            strength = (timePassed - 2) * 100;
         }
         else if (timePassed > 9f)
         {
@@ -32,7 +32,7 @@ public class Title : MonoBehaviour
         }
         else
         {
-            strength = (8.0 - timePassed) * 128.0;
+            strength = (8.0 - timePassed) * 100.0;
         }
 
         if (strength < 0)

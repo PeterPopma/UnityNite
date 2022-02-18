@@ -3,7 +3,7 @@ using System.Collections;
 
 public class DeleteAfterDelay : MonoBehaviour
 {
-	public float delay = 0.4f;
+	public float delay = 3.0f;
 
 	void Update()
 	{

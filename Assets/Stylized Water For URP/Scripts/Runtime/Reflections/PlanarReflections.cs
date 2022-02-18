@@ -205,7 +205,10 @@ namespace StylizedWater
             var data = new PlanarReflectionSettingData();
             data.Set();
             BeginPlanarReflections?.Invoke(context, _reflectionCamera);
-            if (_reflectionCamera.WorldToViewportPoint(reflectionTarget.transform.position).z < 100000) UniversalRenderPipeline.RenderSingleCamera(context, _reflectionCamera);
+            if (_reflectionCamera.WorldToViewportPoint(reflectionTarget.transform.position).z < 100000)
+            {
+                UniversalRenderPipeline.RenderSingleCamera(context, _reflectionCamera);
+            }
             data.Restore();
             Shader.SetGlobalTexture(_planarReflectionTextureId, _reflectionTexture);
         }

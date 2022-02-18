@@ -19,6 +19,7 @@ namespace StarterAssets
 		public bool stairs;
 		public bool wall;
 		public bool floor;
+		public bool dance;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -87,6 +88,11 @@ namespace StarterAssets
 			FloorInput(value.isPressed);
 		}
 
+		public void OnDance(InputValue value)
+		{
+			DanceInput(value.isPressed);
+		}
+
 #else
 	// old input sys if we do decide to have it (most likely wont)...
 #endif
@@ -144,6 +150,11 @@ namespace StarterAssets
 		public void FloorInput(bool newFloor)
 		{
 			floor = newFloor;
+		}
+
+		public void DanceInput(bool newDance)
+		{
+			dance = newDance;
 		}
 
 #if !UNITY_IOS || !UNITY_ANDROID

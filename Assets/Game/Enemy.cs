@@ -3,22 +3,31 @@ using System.Collections;
 using System;
 
 public class Enemy : MonoBehaviour {
-	public float rot_speed_x = 100f;
-	public float rot_speed_y = 100f;
-	public float rot_speed_z = 100f;
-	public bool local=false;
+	[SerializeField] float maxDistance = 100f;
+	private GameObject player;
 	private float speedX;
 	private float speedZ;
 	private bool isHit;
+	private Animator animator;
+	private float timeDied;
+	private bool onGround = false;
 
-    public bool IsHit { get => isHit; set => isHit = value; }
+	public bool IsHit { get => isHit; set => isHit = value; }
+    public float SpeedX { get => speedX; set => speedX = value; }
+    public float SpeedZ { get => speedZ; set => speedZ = value; }
 
     // Use this for initialization
     void Start () {
-		speedX = 12f * UnityEngine.Random.value - 6f;
-		speedZ = 12f * UnityEngine.Random.value - 6f;
-		float rotation = (float)(Math.Atan2(speedX, speedZ) * 180 / Math.PI);
+		float rotation = (float)(Math.Atan2(SpeedX, SpeedZ) * 180 / Math.PI);
 		transform.Rotate(transform.up, rotation);
+		animator = GetComponent<Animator>();
+		player = GameObject.Find("/Player");
+	}
+
+    public void Hit()
+    {
+        isHit = true;
+		timeDied = Time.time;
 	}
 
 	// Update is called once per frame
@@ -44,11 +53,49 @@ public class Enemy : MonoBehaviour {
 			Vector3 pos = transform.position;
 			pos.y = Terrain.activeTerrain.SampleHeight(transform.position) + 0f;
 			transform.position = pos;
-			transform.Translate(new Vector3(speedX, 0f, speedZ) * Time.deltaTime, Space.World);
-			if (transform.position.x < -400 || transform.position.x > 400 || transform.position.z < -400 || transform.position.z > 400)
+			transform.Translate(new Vector3(SpeedX, 0f, SpeedZ) * Time.deltaTime, Space.World);
+			if (Math.Abs(transform.position.x - player.transform.position.x) > maxDistance || Math.Abs(transform.position.z - player.transform.position.z) > maxDistance)
 			{
 				Destroy(gameObject);
 			}
         }
+
+		if (isHit)
+        {
+			if (!onGround && Time.time - timeDied > 2f)
+			{
+				onGround = true;
+			}
+			if (onGround)
+            {
+				animator.SetLayerWeight(2, Mathf.Lerp(animator.GetLayerWeight(2), 1f, Time.deltaTime * 10f));
+			}
+			else
+            {
+				animator.SetLayerWeight(1, Mathf.Lerp(animator.GetLayerWeight(1), 1f, Time.deltaTime * 10f));
+			}
+		}
+
+		if (isHit && Time.time - timeDied > 3f)
+        {
+			Destroy(gameObject);
+		}
+	}
+
+	public static Transform RecursiveFindChild(Transform parent, string childName)
+	{
+		Transform result = null;
+
+		foreach (Transform child in parent)
+		{
+			if (child.name == childName)
+				result = child.transform;
+			else
+				result = RecursiveFindChild(child, childName);
+
+			if (result != null) break;
+		}
+
+		return result;
 	}
 }
