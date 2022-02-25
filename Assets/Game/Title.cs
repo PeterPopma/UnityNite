@@ -5,15 +5,18 @@ using UnityEngine.UI;
 
 public class Title : MonoBehaviour
 {
+    private AudioSource soundIntro;
     public float delay = 6.4f;
     private Image titleImage;
     private float startingTime;
+    private bool isPlaying = false;
 
     // Start is called before the first frame update
     void Start()
     {
         startingTime = Time.time;
         titleImage = GetComponent<Image>();
+        soundIntro = GameObject.Find("/Sound/Intro").GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -21,6 +24,12 @@ public class Title : MonoBehaviour
     {
         float timePassed = Time.time - startingTime;
         double strength = 0;
+
+        if (timePassed > 2f && !isPlaying)
+        {
+            isPlaying = true;
+            soundIntro.Play();
+        }
 
         if (timePassed < 5f)
         {

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using Utilities;
@@ -12,11 +10,11 @@ public class Rocket : MonoBehaviour
     private TextMeshProUGUI textScore;
     private Rigidbody myRigidbody;
     private float timeLastSmoke;
-    private Player playerScript;
+    private Score score;
 
     private void Awake()
     {
-        playerScript = GameObject.Find("/Player").GetComponent<Player>();
+        score = GameObject.Find("/Canvas/Score").GetComponent<Score>();
         myRigidbody = GetComponent<Rigidbody>();
         textScore = GameObject.Find("/Canvas/Score").GetComponent<TextMeshProUGUI>();
         soundRocketExplosion = GameObject.Find("/Sound/RocketExplosion").GetComponent<AudioSource>();
@@ -50,32 +48,9 @@ public class Rocket : MonoBehaviour
 
             foreach (Collider collider in colliders)
             {
-                Rigidbody rigidbody = collider.GetComponent<Rigidbody>();
-                if (rigidbody != null)
+                if (TransformUtilities.CheckHit(collider.transform))
                 {
-                    rigidbody.constraints = RigidbodyConstraints.None;
-                    rigidbody.AddExplosionForce(700f, explosionPos, 4f, 10f);
-                    rigidbody.AddTorque(transform.up * UnityEngine.Random.Range(20f, 80f), ForceMode.VelocityChange);
-                    rigidbody.AddTorque(transform.right * UnityEngine.Random.Range(20f, 80f), ForceMode.VelocityChange);
-                }
-                else if (collider.GetComponent<Enemy>() != null)
-                {
-                    Enemy enemy = collider.gameObject.GetComponent<Enemy>();
-                    enemy.Hit();
-                    rigidbody = collider.gameObject.AddComponent<Rigidbody>();
-                    rigidbody.AddExplosionForce(700f, new Vector3(collider.transform.position.x, collider.transform.position.y - 1, collider.transform.position.z), 4f);
-                    rigidbody.AddTorque(new Vector3(UnityEngine.Random.Range(-500f, 500f), UnityEngine.Random.Range(-500f, 500f), UnityEngine.Random.Range(-500f, 500f)), ForceMode.VelocityChange);
-                    rigidbody.useGravity = true;
-                    // Detach gun
-                    Transform gun = TransformUtilities.RecursiveFindChild(collider.gameObject.transform, "AKM");
-                    gun.parent = null;
-                    rigidbody = gun.gameObject.AddComponent<Rigidbody>();
-                    rigidbody.AddExplosionForce(700f, new Vector3(collider.transform.position.x, collider.transform.position.y - 1, collider.transform.position.z), 4f);
-                    rigidbody.AddTorque(new Vector3(UnityEngine.Random.Range(-500f, 500f), UnityEngine.Random.Range(-500f, 500f), UnityEngine.Random.Range(-500f, 500f)), ForceMode.VelocityChange);
-                    rigidbody.useGravity = true;
-                    gun.gameObject.AddComponent<BoxCollider>();
-                    gun.gameObject.AddComponent<DeleteAfterDelay>();
-                    playerScript.IncreaseScore();
+                    score.IncreaseScore();
                 }
             }
             soundRocketExplosion.Play();

@@ -8,7 +8,6 @@ public class BulletProjectileRaycast : MonoBehaviour
     [SerializeField] private Transform vfxHit;
     private Vector3 targetPosition;
     private Vector3 moveDir;
-    private Vector3 hitDir;
     private float moveSpeed;
 
     public void Setup(Vector3 targetPosition)

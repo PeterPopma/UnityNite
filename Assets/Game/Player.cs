@@ -1,11 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
 using StarterAssets;
 using UnityEngine.UI;
 using UnityEngine.Animations.Rigging;
-using TMPro;
 using System;
 using Utilities;
 
@@ -16,10 +13,12 @@ public class Player : MonoBehaviour
     [SerializeField] private CinemachineVirtualCamera sniperVirtualCamera;
     [SerializeField] private float normalSensitivity;
     [SerializeField] private float aimSensitivity;
+    [SerializeField] private float sniperSensitivity;
     [SerializeField] private Image crosshairAim;
     [SerializeField] private Image crosshairWalk;
     [SerializeField] private LayerMask aimColliderLayerMask = new LayerMask();
-    [SerializeField] private Transform pfBullet;
+    [SerializeField] private GameObject pfBullet;
+    [SerializeField] private GameObject pfLaser;
     [SerializeField] private Transform pfGrenade;
     [SerializeField] private Transform pfRocket;
     [SerializeField] private Transform pfShell;
@@ -40,12 +39,17 @@ public class Player : MonoBehaviour
     [SerializeField] private Transform spawnRunSmokePosition;
     [SerializeField] private Transform spawnBulletSmokePosition;
     [SerializeField] private AudioSource soundBuild;
+    [SerializeField] private AudioSource soundDance;
+    [SerializeField] private AudioSource soundDied;
     [SerializeField] private AudioSource soundSniper;
     [SerializeField] private AudioSource soundGunshot;
+    [SerializeField] private AudioSource soundPickaxe;
+    [SerializeField] private AudioSource soundLaser;
     [SerializeField] private AudioSource soundRocketLauncher;
     [SerializeField] private GameObject[] weapons;
     [SerializeField] private Transform hitPosition;
 
+    private Score score;
     private Animator animator;
     private float timeLastRunSmoke;
     private float timeLastGrenadeThrow;
@@ -53,9 +57,7 @@ public class Player : MonoBehaviour
     private bool throwingGrenade = false;
     private bool thrownGrenade = false;
     private int activeWeapon = 0;
-    private TextMeshProUGUI textScore;
     Vector3 aimDirection;
-    private int score = 0;
     private float aimRigWeight;
     private int placingBuild = -1;
     private GameObject newBuild;
@@ -72,7 +74,7 @@ public class Player : MonoBehaviour
         thirdPersonController = GetComponent<ThirdPersonController>();
         starterAssetsInputs = GetComponent<StarterAssetsInputs>();
         animator = GetComponent<Animator>();
-        textScore = GameObject.Find("/Canvas/Score").GetComponent<TextMeshProUGUI>();
+        score = GameObject.Find("/Canvas/Score").GetComponent<Score>();
         activeWeapon = 0;
         previousYposition = transform.position.y;
     }
@@ -86,10 +88,11 @@ public class Player : MonoBehaviour
         {
             animator.Play("Death", 6, 0f);
             playerDied = true;
+            soundDied.Play();
         }
         previousYposition = yPosition;
         previousVelocity = velocity;
-        if  (playerDied)
+        if (playerDied)
         {
             animator.SetLayerWeight(6, Mathf.Lerp(animator.GetLayerWeight(6), 1f, Time.deltaTime * 4f));
         }
@@ -134,14 +137,15 @@ public class Player : MonoBehaviour
             {
                 if (activeWeapon == 2)
                 {
+                    thirdPersonController.SetSensitivity(sniperSensitivity);
                     sniperVirtualCamera.gameObject.SetActive(true);
                     scope.SetActive(true);
                 }
                 else
-                { 
+                {
+                    thirdPersonController.SetSensitivity(aimSensitivity);
                     aimVirtualCamera.gameObject.SetActive(true);
                 }
-                thirdPersonController.SetSensitivity(aimSensitivity);
                 if (activeWeapon == 0)
                 {
                     crosshairAim.gameObject.SetActive(true);
@@ -204,7 +208,8 @@ public class Player : MonoBehaviour
 
         if (starterAssetsInputs.dance)
         {
-            danceTimeLeft = 4f;
+            soundDance.Play();
+            danceTimeLeft = 5.5f;
             starterAssetsInputs.dance = false;
         }
 
@@ -220,6 +225,9 @@ public class Player : MonoBehaviour
             animator.SetLayerWeight(2, 0f);
             animator.SetLayerWeight(3, 1f);
             animator.SetLayerWeight(4, 0f);
+            animator.SetLayerWeight(5, 0f);
+            animator.SetLayerWeight(6, 0f);
+            animator.SetLayerWeight(7, 0f);
         }
 
         if (placingBuild == 0)      // stairs
@@ -266,7 +274,7 @@ public class Player : MonoBehaviour
             starterAssetsInputs.toggleWeapon = false;
             weapons[activeWeapon].SetActive(false);
             activeWeapon++;
-            if (activeWeapon > 2)
+            if (activeWeapon >= weapons.Length)
             {
                 activeWeapon = 0;
             }
@@ -320,9 +328,9 @@ public class Player : MonoBehaviour
                     //                {
                     //                    scriptInstance.Setup(mouseWorldPosition);
                     //                }
-                    if (TransformUtilities.CheckEnemyHit(hitTransForm))
+                    if (TransformUtilities.CheckHit(hitTransForm))
                     {
-                        IncreaseScore();
+                        score.IncreaseScore();
                     }
                 }
                 if (activeWeapon == 1)
@@ -333,8 +341,30 @@ public class Player : MonoBehaviour
                 }
                 if (activeWeapon == 2)
                 {
-                    Instantiate(pfBullet, spawnBulletPosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
+                    starterAssetsInputs.aim = false;
+                    GameObject bullet = Instantiate(pfBullet, spawnBulletPosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
+                    Bullet bulletScript = bullet.GetComponent<Bullet>();
+                    bulletScript.Setup(hitTransForm);
                     soundSniper.Play();
+                }
+                if (activeWeapon == 3)
+                {
+                    GameObject laser = Instantiate(pfLaser, spawnBulletPosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
+                    Laser laserScript = laser.GetComponent<Laser>();
+                    laserScript.Setup(hitTransForm);
+                    soundLaser.Play();
+                }
+                if (activeWeapon == 4)
+                {
+                    animator.Play("Pickaxe", 7, 0f);
+                    // Pickaxe uses different animation
+                    animator.SetLayerWeight(2, 0f);
+                    animator.SetLayerWeight(7, 1f);
+                    soundPickaxe.Play(); 
+                    if (animator.GetLayerWeight(7) > 0 && TransformUtilities.CheckHit(hitTransForm))
+                    {
+                        score.IncreaseScore();
+                    }
                 }
             }
         }
@@ -342,13 +372,8 @@ public class Player : MonoBehaviour
         {
             // back to normal 
             animator.SetLayerWeight(2, Mathf.Lerp(animator.GetLayerWeight(2), 0f, Time.deltaTime * 10f));
+            animator.SetLayerWeight(7, Mathf.Lerp(animator.GetLayerWeight(7), 0f, Time.deltaTime * 1f));
         }
-    }
-
-    public void IncreaseScore()
-    {
-        score++;
-        textScore.text = "Kills: " + score.ToString();
     }
 
     private void ConfirmBuild()

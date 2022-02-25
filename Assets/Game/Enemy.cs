@@ -4,6 +4,7 @@ using System;
 
 public class Enemy : MonoBehaviour {
 	[SerializeField] float maxDistance = 100f;
+	private AudioSource[] soundOuch = new AudioSource[4];
 	private GameObject player;
 	private float speedX;
 	private float speedZ;
@@ -22,12 +23,17 @@ public class Enemy : MonoBehaviour {
 		transform.Rotate(transform.up, rotation);
 		animator = GetComponent<Animator>();
 		player = GameObject.Find("/Player");
+		soundOuch[0] = GameObject.Find("/Sound/Ouch").GetComponent<AudioSource>();
+		soundOuch[1] = GameObject.Find("/Sound/Ouch2").GetComponent<AudioSource>();
+		soundOuch[2] = GameObject.Find("/Sound/Ouch3").GetComponent<AudioSource>();
+		soundOuch[3] = GameObject.Find("/Sound/Ouch4").GetComponent<AudioSource>();
 	}
 
-    public void Hit()
+	public void Hit()
     {
         isHit = true;
 		timeDied = Time.time;
+		soundOuch[UnityEngine.Random.Range(0, 4)].Play();
 	}
 
 	// Update is called once per frame

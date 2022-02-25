@@ -10,6 +10,7 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] float secondsBetweenSpawns;
     [SerializeField] int maxSquadSize = 5;
     [SerializeField] int maxDistance = 100;
+    [SerializeField] float maxSpeed = 6f;
     System.Random random = new System.Random();
 
     void Start()
@@ -24,8 +25,8 @@ public class EnemySpawner : MonoBehaviour
             float x, z;
             x = player.transform.position.x + (UnityEngine.Random.value * 2 * maxDistance) - maxDistance;
             z = player.transform.position.z + (UnityEngine.Random.value * 2 * maxDistance) - maxDistance;
-            float speedX = 12f * UnityEngine.Random.value - 6f;
-            float speedZ = 12f * UnityEngine.Random.value - 6f;
+            float speedX = maxSpeed * 2 * UnityEngine.Random.value - maxSpeed;
+            float speedZ = maxSpeed * 2 * UnityEngine.Random.value - maxSpeed;
             float rotation = (float)(Math.Atan2(speedX, speedZ) * 180 / Math.PI);
             int squadSize = random.Next(1, maxSquadSize);
             for (int k = 0; k < squadSize; k++)
