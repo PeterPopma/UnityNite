@@ -9,14 +9,16 @@ public class Bullet : MonoBehaviour
     public float lifetime = 3.0f;
     private Vector3 moveDir;
     private Transform hitTransForm;
+    private Vector3 hitPosition;
     private Score score;
     private float moveSpeed;
     private float previousDistance;
     private bool makingHit;
     private bool madeHit;
 
-    public void Setup(Transform hitTransForm)
+    public void Setup(Transform hitTransForm, Vector3 hitPosition)
     {
+        this.hitPosition = hitPosition;
         this.hitTransForm = hitTransForm;
         if (hitTransForm != null && (hitTransForm.GetComponent<Target>() != null || hitTransForm.GetComponent<Enemy>() != null))
         {
@@ -58,7 +60,7 @@ public class Bullet : MonoBehaviour
             {
                 transform.position += moveSpeed * Time.deltaTime * -moveDir;
                 //            Instantiate(vfxHit, targetPosition, Quaternion.identity);
-                if (TransformUtilities.CheckHit(hitTransForm))
+                if (TransformUtilities.CheckHit(hitTransForm, hitPosition))
                 {
                     score.IncreaseScore();
                 }

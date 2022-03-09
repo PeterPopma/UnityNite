@@ -5,6 +5,8 @@ using UnityEngine.UI;
 using UnityEngine.Animations.Rigging;
 using System;
 using Utilities;
+using System.Collections;
+using TMPro;
 
 public class Player : MonoBehaviour
 {
@@ -44,6 +46,8 @@ public class Player : MonoBehaviour
     [SerializeField] private AudioSource soundSniper;
     [SerializeField] private AudioSource soundGunshot;
     [SerializeField] private AudioSource soundPickaxe;
+    [SerializeField] private AudioSource soundFootstepLeft;
+    [SerializeField] private AudioSource soundFootstepRight;
     [SerializeField] private AudioSource soundLaser;
     [SerializeField] private AudioSource soundRocketLauncher;
     [SerializeField] private GameObject[] weapons;
@@ -65,9 +69,14 @@ public class Player : MonoBehaviour
     private float previousVelocity;
     private float previousYposition;
     private bool playerDied = false;
+    bool playingFootstep = false;
+    bool makingLeftFootstep = false;
 
     private ThirdPersonController thirdPersonController;
     private StarterAssetsInputs starterAssetsInputs;
+
+    private TextMeshProUGUI textWeapon;
+    private Image imageWeapon;
 
     private void Awake()
     {
@@ -75,6 +84,8 @@ public class Player : MonoBehaviour
         starterAssetsInputs = GetComponent<StarterAssetsInputs>();
         animator = GetComponent<Animator>();
         score = GameObject.Find("/Canvas/Score").GetComponent<Score>();
+        textWeapon = GameObject.Find("/Canvas/Weapon/Description").GetComponent<TextMeshProUGUI>();
+        imageWeapon = GameObject.Find("/Canvas/Weapon/Image").GetComponent<Image>();
         activeWeapon = 0;
         previousYposition = transform.position.y;
     }
@@ -86,7 +97,7 @@ public class Player : MonoBehaviour
         float velocity = Math.Abs(previousYposition - yPosition) / Time.deltaTime;
         if (!playerDied && previousVelocity - velocity > 20f)
         {
-            animator.Play("Death", 6, 0f);
+            animator.Play("RifleDeathA", 6, 0f);
             playerDied = true;
             soundDied.Play();
         }
@@ -97,32 +108,26 @@ public class Player : MonoBehaviour
             animator.SetLayerWeight(6, Mathf.Lerp(animator.GetLayerWeight(6), 1f, Time.deltaTime * 4f));
         }
 
-        Vector3 mouseWorldPosition;
         Vector2 screenCenterPoint = new Vector2(Screen.width / 2f, Screen.height / 2f);
         Ray ray = Camera.main.ScreenPointToRay(screenCenterPoint);
         Transform hitTransForm = null;
         if (Physics.Raycast(ray, out RaycastHit raycastHit, 9999f, aimColliderLayerMask))
         {
             hitTransForm = raycastHit.transform;
-            mouseWorldPosition = raycastHit.point;
+            hitPosition.position = raycastHit.point;
         }
         else
         {
             // we didn't hit anything, so take a point in the direction of the ray
-            mouseWorldPosition = ray.GetPoint(300);
+            hitPosition.position = ray.GetPoint(300);
         }
 
-        hitPosition.position = mouseWorldPosition;
-
-        Vector3 worldAimTarget = mouseWorldPosition;
-        worldAimTarget.y = transform.position.y;
-        aimDirection = (worldAimTarget - transform.position).normalized;
+        Vector3 aimLocationXZ = new Vector3(hitPosition.position.x, hitPosition.position.y, hitPosition.position.z);
+        aimLocationXZ.y = transform.position.y;
+        aimDirection = (hitPosition.position - spawnBulletPosition.position).normalized;
 
         // Turn player towards aim point (only x and z axis)
-        transform.forward = Vector3.Lerp(transform.forward, aimDirection, Time.deltaTime * 20f);
-        
-        // Set aimdirection (including y axis)
-        aimDirection = (mouseWorldPosition - transform.position).normalized;
+        transform.forward = Vector3.Lerp(transform.forward, (aimLocationXZ - transform.position).normalized, Time.deltaTime * 20f);
 
         if (starterAssetsInputs.aim)
         {
@@ -146,7 +151,7 @@ public class Player : MonoBehaviour
                     thirdPersonController.SetSensitivity(aimSensitivity);
                     aimVirtualCamera.gameObject.SetActive(true);
                 }
-                if (activeWeapon == 0)
+                if (activeWeapon == 0 || activeWeapon == 1 || activeWeapon == 3)
                 {
                     crosshairAim.gameObject.SetActive(true);
                 }
@@ -189,6 +194,10 @@ public class Player : MonoBehaviour
 
         if (starterAssetsInputs.move.magnitude > 0)
         {
+            if (thirdPersonController.Grounded && !playingFootstep)
+            {
+                StartCoroutine("playFootStep");
+            }
             if (Time.time >= timeLastRunSmoke + 0.1f)
             {
                 timeLastRunSmoke = Time.time;
@@ -271,14 +280,7 @@ public class Player : MonoBehaviour
 
         if (starterAssetsInputs.toggleWeapon)
         {
-            starterAssetsInputs.toggleWeapon = false;
-            weapons[activeWeapon].SetActive(false);
-            activeWeapon++;
-            if (activeWeapon >= weapons.Length)
-            {
-                activeWeapon = 0;
-            }
-            weapons[activeWeapon].SetActive(true);
+            ToggleWeapon();
         }
 
         if (throwingGrenade)
@@ -328,7 +330,7 @@ public class Player : MonoBehaviour
                     //                {
                     //                    scriptInstance.Setup(mouseWorldPosition);
                     //                }
-                    if (TransformUtilities.CheckHit(hitTransForm))
+                    if (TransformUtilities.CheckHit(hitTransForm, hitPosition.position))
                     {
                         score.IncreaseScore();
                     }
@@ -344,24 +346,24 @@ public class Player : MonoBehaviour
                     starterAssetsInputs.aim = false;
                     GameObject bullet = Instantiate(pfBullet, spawnBulletPosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
                     Bullet bulletScript = bullet.GetComponent<Bullet>();
-                    bulletScript.Setup(hitTransForm);
+                    bulletScript.Setup(hitTransForm, hitPosition.position);
                     soundSniper.Play();
                 }
                 if (activeWeapon == 3)
                 {
                     GameObject laser = Instantiate(pfLaser, spawnBulletPosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
                     Laser laserScript = laser.GetComponent<Laser>();
-                    laserScript.Setup(hitTransForm);
+                    laserScript.Setup(hitTransForm, hitPosition.position);
                     soundLaser.Play();
                 }
                 if (activeWeapon == 4)
                 {
-                    animator.Play("Pickaxe", 7, 0f);
+                    animator.Play("SSAttack", 7, 0f);
                     // Pickaxe uses different animation
                     animator.SetLayerWeight(2, 0f);
                     animator.SetLayerWeight(7, 1f);
                     soundPickaxe.Play(); 
-                    if (animator.GetLayerWeight(7) > 0 && TransformUtilities.CheckHit(hitTransForm))
+                    if (animator.GetLayerWeight(7) > 0 && TransformUtilities.CheckHit(hitTransForm, hitPosition.position))
                     {
                         score.IncreaseScore();
                     }
@@ -373,6 +375,41 @@ public class Player : MonoBehaviour
             // back to normal 
             animator.SetLayerWeight(2, Mathf.Lerp(animator.GetLayerWeight(2), 0f, Time.deltaTime * 10f));
             animator.SetLayerWeight(7, Mathf.Lerp(animator.GetLayerWeight(7), 0f, Time.deltaTime * 1f));
+        }
+    }
+
+    private void ToggleWeapon()
+    {
+        starterAssetsInputs.toggleWeapon = false;
+        weapons[activeWeapon].SetActive(false);
+        activeWeapon++;
+        if (activeWeapon >= weapons.Length)
+        {
+            activeWeapon = 0;
+        }
+        weapons[activeWeapon].SetActive(true);
+        switch(activeWeapon)
+        {
+            case 0:
+                imageWeapon.sprite = Resources.Load<Sprite>("akm_complete");
+                textWeapon.text = "AKM";
+                break;
+            case 1:
+                imageWeapon.sprite = Resources.Load<Sprite>("rocket_complete");
+                textWeapon.text = "Rocketlauncher";
+                break;
+            case 2:
+                imageWeapon.sprite = Resources.Load<Sprite>("sniper_complete");
+                textWeapon.text = "Sniper";
+                break;
+            case 3:
+                imageWeapon.sprite = Resources.Load<Sprite>("laser_complete");
+                textWeapon.text = "Laser";
+                break;
+            case 4:
+                imageWeapon.sprite = Resources.Load<Sprite>("axe_complete");
+                textWeapon.text = "Pickaxe";
+                break;
         }
     }
 
@@ -396,6 +433,24 @@ public class Player : MonoBehaviour
             GameObject newFloor = Instantiate(pfWall);
             UpdateFloorPosition(newFloor);
         }
+    }
+
+    IEnumerator playFootStep()
+    {
+        playingFootstep = true;
+        
+        AudioSource footstep = makingLeftFootstep ? soundFootstepLeft : soundFootstepRight;
+        makingLeftFootstep = !makingLeftFootstep;
+
+
+        // Pick a random pitch to play it at
+        float randomPitch = UnityEngine.Random.Range(1, 3);
+        footstep.pitch = (int)randomPitch;
+
+        // Play the sound
+        footstep.Play();
+        yield return new WaitForSeconds(footstep.clip.length);
+        playingFootstep = false;
     }
 
     private void UpdateStairsPosition(GameObject stairs)

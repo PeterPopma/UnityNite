@@ -3,14 +3,21 @@ using System.Collections;
 using System;
 
 public class Enemy : MonoBehaviour {
-	[SerializeField] float maxDistance = 100f;
+	[SerializeField] float maxDistanceFromPlayer = 100f;
+	[SerializeField] float maxDistanceFireAudible = 20f;
+	[SerializeField] private Transform spawnFirePosition;
+	[SerializeField] private Transform vfxMuzzleFire;
+	[SerializeField] private Transform vfxHit;
 	private AudioSource[] soundOuch = new AudioSource[4];
+	private AudioSource soundGunshot;
 	private GameObject player;
 	private float speedX;
 	private float speedZ;
 	private bool isHit;
 	private Animator animator;
 	private float timeDied;
+	private float timeSinceLastFire;
+	private float timeSpawn;
 	private bool onGround = false;
 
 	public bool IsHit { get => isHit; set => isHit = value; }
@@ -27,13 +34,18 @@ public class Enemy : MonoBehaviour {
 		soundOuch[1] = GameObject.Find("/Sound/Ouch2").GetComponent<AudioSource>();
 		soundOuch[2] = GameObject.Find("/Sound/Ouch3").GetComponent<AudioSource>();
 		soundOuch[3] = GameObject.Find("/Sound/Ouch4").GetComponent<AudioSource>();
+		soundGunshot = GameObject.Find("/Sound/Gunshot2").GetComponent<AudioSource>();
 	}
 
-	public void Hit()
+	public void Hit(Vector3 hitPosition)
     {
         isHit = true;
 		timeDied = Time.time;
 		soundOuch[UnityEngine.Random.Range(0, 4)].Play();
+		if (!hitPosition.Equals(Vector3.zero))
+		{
+			Instantiate(vfxHit, hitPosition, vfxHit.transform.rotation);
+		}
 	}
 
 	// Update is called once per frame
@@ -54,13 +66,25 @@ public class Enemy : MonoBehaviour {
 
     private void Update()
     {
+		timeSinceLastFire += Time.deltaTime;
+		if (timeSinceLastFire >= timeSpawn)
+		{
+			timeSinceLastFire = 0;
+			Instantiate(vfxMuzzleFire, spawnFirePosition.position, vfxMuzzleFire.transform.rotation);
+			if (Math.Abs(transform.position.x - player.transform.position.x) < maxDistanceFireAudible && Math.Abs(transform.position.z - player.transform.position.z) < maxDistanceFireAudible)
+            {
+				AudioSource.PlayClipAtPoint(soundGunshot.clip, spawnFirePosition.position);
+			}
+			timeSpawn = UnityEngine.Random.Range(0.5f, 10f);
+		}
+
 		if (!isHit)
 		{
 			Vector3 pos = transform.position;
 			pos.y = Terrain.activeTerrain.SampleHeight(transform.position) + 0f;
 			transform.position = pos;
 			transform.Translate(new Vector3(SpeedX, 0f, SpeedZ) * Time.deltaTime, Space.World);
-			if (Math.Abs(transform.position.x - player.transform.position.x) > maxDistance || Math.Abs(transform.position.z - player.transform.position.z) > maxDistance)
+			if (Math.Abs(transform.position.x - player.transform.position.x) > maxDistanceFromPlayer || Math.Abs(transform.position.z - player.transform.position.z) > maxDistanceFromPlayer)
 			{
 				Destroy(gameObject);
 			}

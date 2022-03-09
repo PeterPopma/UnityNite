@@ -10,7 +10,7 @@ using System.Collections.Generic;
 /// </summary>
 public class LightFlicker : MonoBehaviour
 {
-    private Light light;
+    private new Light light;
     [Tooltip("Minimum random light intensity")]
     public float minIntensity = 0f;
     [Tooltip("Maximum random light intensity")]

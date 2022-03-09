@@ -48,7 +48,7 @@ public class Rocket : MonoBehaviour
 
             foreach (Collider collider in colliders)
             {
-                if (TransformUtilities.CheckHit(collider.transform))
+                if (TransformUtilities.CheckHit(collider.transform, Vector3.zero))
                 {
                     score.IncreaseScore();
                 }

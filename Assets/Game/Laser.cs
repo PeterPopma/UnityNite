@@ -3,33 +3,25 @@ using Utilities;
 
 public class Laser : MonoBehaviour
 {
-    [SerializeField] private Transform vfxHit;
-    public float lifetime = 3.0f;
+    [SerializeField] float lifetime = 3.0f;
     private Vector3 moveDir;
     private Transform hitTransForm;
+    private Vector3 hitPosition;
     private Score score;
-    private float moveSpeed;
     private float previousDistance;
     private bool makingHit;
     private bool madeHit;
 
-    public void Setup(Transform hitTransForm)
+    public void Setup(Transform hitTransForm, Vector3 hitPosition)
     {
         this.hitTransForm = hitTransForm;
+        this.hitPosition = hitPosition;
+
         if (hitTransForm != null && (hitTransForm.GetComponent<Target>() != null || hitTransForm.GetComponent<Enemy>() != null))
         {
-            moveDir = (hitTransForm.position - transform.position).normalized;
             previousDistance = Vector3.Distance(transform.position, hitTransForm.position);
             makingHit = true;
-            madeHit = false;
         }
-        else
-        {
-            moveDir = transform.forward;
-            makingHit = false;
-        }
-        moveSpeed = 60f;
-//        renderer = GetComponent<Renderer>();
     }
 
     private void Awake()
@@ -39,12 +31,9 @@ public class Laser : MonoBehaviour
 
     private void Update()
     {
+        /*
         if (makingHit)
         {
-            if (!madeHit)
-            {
-                transform.position += moveSpeed * Time.deltaTime * moveDir;
-            }
 
             float distance = Vector3.Distance(transform.position, hitTransForm.position);
 
@@ -52,8 +41,7 @@ public class Laser : MonoBehaviour
             if (distance > previousDistance)
             {
                 transform.position += moveSpeed * Time.deltaTime * -moveDir;
-                //            Instantiate(vfxHit, targetPosition, Quaternion.identity);
-                if (TransformUtilities.CheckHit(hitTransForm))
+                if (TransformUtilities.CheckHit(hitTransForm, hitPosition))
                 {
                     score.IncreaseScore();
                 }
@@ -64,12 +52,18 @@ public class Laser : MonoBehaviour
         }
         else
         {
-            transform.position += moveDir * Time.deltaTime * moveSpeed;
-            lifetime -= Time.deltaTime;
-            if (lifetime < 0f)
+ //           transform.position += moveDir * Time.deltaTime * moveSpeed;
+
+        }
+        */
+        lifetime -= Time.deltaTime;
+        if (lifetime < 0f)
+        {
+            if (TransformUtilities.CheckHit(hitTransForm, hitPosition))
             {
-                Destroy(gameObject);
+                score.IncreaseScore();
             }
+            Destroy(gameObject);
         }
     }
 }

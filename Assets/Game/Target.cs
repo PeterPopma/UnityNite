@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class Target : MonoBehaviour
 {
+    [SerializeField] private Transform vfxHit;
     private AudioSource soundSmash;
-    
+
     // Start is called before the first frame update
     void Start()
     {
@@ -18,8 +19,12 @@ public class Target : MonoBehaviour
         
     }
 
-    public void Hit()
+    public void Hit(Vector3 hitPosition)
     {
         soundSmash.Play();
+        if (!hitPosition.Equals(Vector3.zero))
+        {
+            Instantiate(vfxHit, hitPosition, vfxHit.transform.rotation);
+        }
     }
 }

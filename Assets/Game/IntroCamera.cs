@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class IntroCamera : MonoBehaviour
 {
@@ -25,5 +26,13 @@ public class IntroCamera : MonoBehaviour
         textFrameRate.enabled = true;
         TextMeshProUGUI textPlayersLeft = GameObject.Find("/Canvas/PlayersLeft").GetComponent<TextMeshProUGUI>();
         textPlayersLeft.enabled = true;
+        TextMeshProUGUI textWeapon = GameObject.Find("/Canvas/Weapon/Description").GetComponent<TextMeshProUGUI>();
+        textWeapon.enabled = true;
+        Image image = GameObject.Find("/Canvas/Weapon/Image").GetComponent<Image>();
+        image.enabled = true;
+        image = GameObject.Find("/Canvas/ScoreBackground").GetComponent<Image>();
+        image.enabled = true;
+        image = GameObject.Find("/Canvas/PlayersLeftBackground").GetComponent<Image>();
+        image.enabled = true;
     }
 }
