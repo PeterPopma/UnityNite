@@ -47,7 +47,7 @@ public class Grenade : MonoBehaviour
             {
                 if (TransformUtilities.CheckHit(collider.transform, Vector3.zero))
                 {
-                    score.IncreaseScore();
+                    score.IncreaseScore(100);
                 }
             }
 

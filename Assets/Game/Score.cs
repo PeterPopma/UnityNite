@@ -13,9 +13,9 @@ public class Score : MonoBehaviour
         textScore = GameObject.Find("/Canvas/Score").GetComponent<TextMeshProUGUI>();
     }
 
-    public void IncreaseScore()
+    public void IncreaseScore(int amount)
     {
-        score++;
-        textScore.text = "Kills: " + score;
+        score += amount;
+        textScore.text = "Score: " + score;
     }
 }

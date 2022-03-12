@@ -3,27 +3,27 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-public class PlayersLeft : MonoBehaviour
+public class TimeLeft : MonoBehaviour
 {
-    int playersLeft;
+    int timeLeft;
     private TextMeshProUGUI textPlayersLeft;
-    private float timeLastPlayerLeftUpdate;
+    private float timeLastTimeLeftUpdate;
 
     // Start is called before the first frame update
     void Start()
     {
-        playersLeft = 100; 
+        timeLeft = 300; 
         textPlayersLeft = GetComponent<TextMeshProUGUI>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Time.time >= timeLastPlayerLeftUpdate + 2.0f)
+        if (Time.time >= timeLastTimeLeftUpdate + 1.0f)
         {
-            timeLastPlayerLeftUpdate = Time.time;
-            playersLeft--;
-            textPlayersLeft.text = "Players left: " + playersLeft.ToString();
+            timeLastTimeLeftUpdate = Time.time;
+            timeLeft--;
+            textPlayersLeft.text = "Time left: " + timeLeft.ToString();
         }
     }
 }

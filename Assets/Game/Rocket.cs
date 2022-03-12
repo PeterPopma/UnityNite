@@ -50,7 +50,7 @@ public class Rocket : MonoBehaviour
             {
                 if (TransformUtilities.CheckHit(collider.transform, Vector3.zero))
                 {
-                    score.IncreaseScore();
+                    score.IncreaseScore(100);
                 }
             }
             soundRocketExplosion.Play();

@@ -62,7 +62,7 @@ public class Bullet : MonoBehaviour
                 //            Instantiate(vfxHit, targetPosition, Quaternion.identity);
                 if (TransformUtilities.CheckHit(hitTransForm, hitPosition))
                 {
-                    score.IncreaseScore();
+                    score.IncreaseScore(100);
                 }
                 madeHit = true;
                 //                renderer.enabled = false;

@@ -11,13 +11,9 @@ using TMPro;
 public class Player : MonoBehaviour
 {
     [SerializeField] private Rig aimRig;
-    [SerializeField] private CinemachineVirtualCamera aimVirtualCamera;
-    [SerializeField] private CinemachineVirtualCamera sniperVirtualCamera;
     [SerializeField] private float normalSensitivity;
     [SerializeField] private float aimSensitivity;
     [SerializeField] private float sniperSensitivity;
-    [SerializeField] private Image crosshairAim;
-    [SerializeField] private Image crosshairWalk;
     [SerializeField] private LayerMask aimColliderLayerMask = new LayerMask();
     [SerializeField] private GameObject pfBullet;
     [SerializeField] private GameObject pfLaser;
@@ -32,27 +28,32 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject pfWall;
     [SerializeField] private GameObject pfTempStairs;
     [SerializeField] private GameObject pfTempWall;
-    [SerializeField] private GameObject bulletTrail;
-    [SerializeField] private GameObject scope;
     [SerializeField] private Transform spawnBulletPosition;
     [SerializeField] private Transform spawnGrenadePosition;
     [SerializeField] private Transform spawnRocketPosition;
     [SerializeField] private Transform spawnFirePosition;
     [SerializeField] private Transform spawnRunSmokePosition;
     [SerializeField] private Transform spawnBulletSmokePosition;
-    [SerializeField] private AudioSource soundBuild;
-    [SerializeField] private AudioSource soundDance;
-    [SerializeField] private AudioSource soundDied;
-    [SerializeField] private AudioSource soundSniper;
-    [SerializeField] private AudioSource soundGunshot;
-    [SerializeField] private AudioSource soundPickaxe;
-    [SerializeField] private AudioSource soundFootstepLeft;
-    [SerializeField] private AudioSource soundFootstepRight;
-    [SerializeField] private AudioSource soundLaser;
-    [SerializeField] private AudioSource soundRocketLauncher;
     [SerializeField] private GameObject[] weapons;
-    [SerializeField] private Transform hitPosition;
 
+    private Image scope;
+    private EnemySpawner enemySpawnerScript;
+    private AudioSource soundBuild;
+    private AudioSource soundDance;
+    private AudioSource soundDied;
+    private AudioSource soundSniper;
+    private AudioSource soundGunshot;
+    private AudioSource soundPickaxe;
+    private AudioSource soundFootstepLeft;
+    private AudioSource soundFootstepRight;
+    private AudioSource soundLaser;
+    private AudioSource soundRocketLauncher;
+    private Image crosshairAim;
+    private Image crosshairWalk;
+    private CinemachineVirtualCamera aimVirtualCamera;
+    private CinemachineVirtualCamera sniperVirtualCamera;
+    private CinemachineVirtualCamera playerFollowVirtualCamera;
+    private Vector3 hitPosition;
     private Score score;
     private Animator animator;
     private float timeLastRunSmoke;
@@ -71,6 +72,7 @@ public class Player : MonoBehaviour
     private bool playerDied = false;
     bool playingFootstep = false;
     bool makingLeftFootstep = false;
+    bool playerHasLanded = false;
 
     private ThirdPersonController thirdPersonController;
     private StarterAssetsInputs starterAssetsInputs;
@@ -86,16 +88,53 @@ public class Player : MonoBehaviour
         score = GameObject.Find("/Canvas/Score").GetComponent<Score>();
         textWeapon = GameObject.Find("/Canvas/Weapon/Description").GetComponent<TextMeshProUGUI>();
         imageWeapon = GameObject.Find("/Canvas/Weapon/Image").GetComponent<Image>();
+        aimVirtualCamera = GameObject.Find("/Cameras/AimCamera").GetComponent<CinemachineVirtualCamera>();
+        sniperVirtualCamera = GameObject.Find("/Cameras/SniperCamera").GetComponent<CinemachineVirtualCamera>();
+        playerFollowVirtualCamera = GameObject.Find("/Cameras/PlayerFollowCamera").GetComponent<CinemachineVirtualCamera>();
+        crosshairAim = GameObject.Find("/Canvas/CrosshairAim").GetComponent<Image>();
+        crosshairWalk = GameObject.Find("/Canvas/CrosshairWalk").GetComponent<Image>();
+        scope = GameObject.Find("/Canvas/Scope").GetComponent<Image>();
+        soundBuild = GameObject.Find("/Sound/Build").GetComponent<AudioSource>();
+        soundDance = GameObject.Find("/Sound/Dance").GetComponent<AudioSource>();
+        soundDied = GameObject.Find("/Sound/Died").GetComponent<AudioSource>();
+        soundSniper = GameObject.Find("/Sound/Sniper").GetComponent<AudioSource>();
+        soundGunshot = GameObject.Find("/Sound/Gunshot").GetComponent<AudioSource>();
+        soundPickaxe = GameObject.Find("/Sound/Pickaxe").GetComponent<AudioSource>();
+        soundFootstepLeft = GameObject.Find("/Sound/FootstepLeft").GetComponent<AudioSource>();
+        soundFootstepRight = GameObject.Find("/Sound/FootstepRight").GetComponent<AudioSource>();
+        soundLaser = GameObject.Find("/Sound/Laser").GetComponent<AudioSource>();
+        soundRocketLauncher = GameObject.Find("/Sound/RocketLauncher").GetComponent<AudioSource>();
+        enemySpawnerScript = GameObject.Find("/Scripts/EnemySpawner").GetComponent<EnemySpawner>();
+        enemySpawnerScript.Player = gameObject;
         activeWeapon = 0;
         previousYposition = transform.position.y;
+
+        // set cameras to follow this player
+        aimVirtualCamera.Follow = gameObject.transform.Find("PlayerCameraRoot").transform;
+        sniperVirtualCamera.Follow = gameObject.transform.Find("PlayerCameraRoot").transform;
+        playerFollowVirtualCamera.Follow = gameObject.transform.Find("PlayerCameraRoot").transform;
     }
+        
 
     // Update is called once per frame
     void Update()
     {
         float yPosition = transform.position.y;
         float velocity = Math.Abs(previousYposition - yPosition) / Time.deltaTime;
-        if (!playerDied && previousVelocity - velocity > 20f)
+        if (!playerHasLanded)
+        {
+            animator.SetLayerWeight(8, 1f);
+
+            if (gameObject.transform.position.y < Terrain.activeTerrain.SampleHeight(gameObject.transform.position) + 5)
+            {
+                gameObject.transform.position = new Vector3(gameObject.transform.position.x, Terrain.activeTerrain.SampleHeight(gameObject.transform.position), gameObject.transform.position.z);
+                playerHasLanded = true;
+                animator.SetLayerWeight(8, 0f);
+                previousVelocity = velocity = 0;
+                yPosition = transform.position.y;
+            }
+        }
+        else if (!playerDied && previousVelocity - velocity > 20f)
         {
             animator.Play("RifleDeathA", 6, 0f);
             playerDied = true;
@@ -114,17 +153,17 @@ public class Player : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit raycastHit, 9999f, aimColliderLayerMask))
         {
             hitTransForm = raycastHit.transform;
-            hitPosition.position = raycastHit.point;
+            hitPosition = raycastHit.point;
         }
         else
         {
             // we didn't hit anything, so take a point in the direction of the ray
-            hitPosition.position = ray.GetPoint(300);
+            hitPosition = ray.GetPoint(300);
         }
 
-        Vector3 aimLocationXZ = new Vector3(hitPosition.position.x, hitPosition.position.y, hitPosition.position.z);
+        Vector3 aimLocationXZ = new Vector3(hitPosition.x, hitPosition.y, hitPosition.z);
         aimLocationXZ.y = transform.position.y;
-        aimDirection = (hitPosition.position - spawnBulletPosition.position).normalized;
+        aimDirection = (hitPosition - spawnBulletPosition.position).normalized;
 
         // Turn player towards aim point (only x and z axis)
         transform.forward = Vector3.Lerp(transform.forward, (aimLocationXZ - transform.position).normalized, Time.deltaTime * 20f);
@@ -144,7 +183,7 @@ public class Player : MonoBehaviour
                 {
                     thirdPersonController.SetSensitivity(sniperSensitivity);
                     sniperVirtualCamera.gameObject.SetActive(true);
-                    scope.SetActive(true);
+                    scope.enabled = true;
                 }
                 else
                 {
@@ -181,7 +220,7 @@ public class Player : MonoBehaviour
             thirdPersonController.SetSensitivity(normalSensitivity);
             crosshairAim.gameObject.SetActive(false);
             crosshairWalk.gameObject.SetActive(true);
-            scope.SetActive(false);
+            scope.enabled = false;
 
             if (!throwingGrenade)
             {
@@ -324,15 +363,9 @@ public class Player : MonoBehaviour
                     Instantiate(pfShell, spawnBulletPosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
                     Instantiate(pfFire, spawnFirePosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
                     Instantiate(pfGunFireSmoke, spawnBulletSmokePosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
-                    // add bullet trail
-                    //                var scriptInstance = Instantiate(bulletTrail, spawnBulletPosition.position, Quaternion.LookRotation(aimDirection, Vector3.up)).GetComponent<BulletProjectileRaycast>();
-                    //                if (scriptInstance != null)
-                    //                {
-                    //                    scriptInstance.Setup(mouseWorldPosition);
-                    //                }
-                    if (TransformUtilities.CheckHit(hitTransForm, hitPosition.position))
+                    if (TransformUtilities.CheckHit(hitTransForm, hitPosition))
                     {
-                        score.IncreaseScore();
+                        score.IncreaseScore(100);
                     }
                 }
                 if (activeWeapon == 1)
@@ -346,14 +379,14 @@ public class Player : MonoBehaviour
                     starterAssetsInputs.aim = false;
                     GameObject bullet = Instantiate(pfBullet, spawnBulletPosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
                     Bullet bulletScript = bullet.GetComponent<Bullet>();
-                    bulletScript.Setup(hitTransForm, hitPosition.position);
+                    bulletScript.Setup(hitTransForm, hitPosition);
                     soundSniper.Play();
                 }
                 if (activeWeapon == 3)
                 {
                     GameObject laser = Instantiate(pfLaser, spawnBulletPosition.position, Quaternion.LookRotation(aimDirection, Vector3.up));
                     Laser laserScript = laser.GetComponent<Laser>();
-                    laserScript.Setup(hitTransForm, hitPosition.position);
+                    laserScript.Setup(hitTransForm, hitPosition);
                     soundLaser.Play();
                 }
                 if (activeWeapon == 4)
@@ -363,9 +396,9 @@ public class Player : MonoBehaviour
                     animator.SetLayerWeight(2, 0f);
                     animator.SetLayerWeight(7, 1f);
                     soundPickaxe.Play(); 
-                    if (animator.GetLayerWeight(7) > 0 && TransformUtilities.CheckHit(hitTransForm, hitPosition.position))
+                    if (animator.GetLayerWeight(7) > 0 && TransformUtilities.CheckHit(hitTransForm, hitPosition))
                     {
-                        score.IncreaseScore();
+                        score.IncreaseScore(100);
                     }
                 }
             }

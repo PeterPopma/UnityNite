@@ -4,13 +4,12 @@ using Utilities;
 public class Laser : MonoBehaviour
 {
     [SerializeField] float lifetime = 3.0f;
-    private Vector3 moveDir;
     private Transform hitTransForm;
     private Vector3 hitPosition;
     private Score score;
-    private float previousDistance;
-    private bool makingHit;
-    private bool madeHit;
+//    private float previousDistance;
+//    private bool makingHit;
+//    private bool madeHit;
 
     public void Setup(Transform hitTransForm, Vector3 hitPosition)
     {
@@ -19,8 +18,8 @@ public class Laser : MonoBehaviour
 
         if (hitTransForm != null && (hitTransForm.GetComponent<Target>() != null || hitTransForm.GetComponent<Enemy>() != null))
         {
-            previousDistance = Vector3.Distance(transform.position, hitTransForm.position);
-            makingHit = true;
+//            previousDistance = Vector3.Distance(transform.position, hitTransForm.position);
+//            makingHit = true;
         }
     }
 
@@ -61,7 +60,7 @@ public class Laser : MonoBehaviour
         {
             if (TransformUtilities.CheckHit(hitTransForm, hitPosition))
             {
-                score.IncreaseScore();
+                score.IncreaseScore(100);
             }
             Destroy(gameObject);
         }

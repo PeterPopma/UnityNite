@@ -61,7 +61,7 @@ namespace Utilities
             rigidbody.AddTorque(new Vector3(UnityEngine.Random.Range(-500f, 500f), UnityEngine.Random.Range(-500f, 500f), UnityEngine.Random.Range(-500f, 500f)), ForceMode.VelocityChange);
             rigidbody.useGravity = true;
             // Detach gun
-            Transform gun = TransformUtilities.RecursiveFindChild(hitTransForm.gameObject.transform, "AKM");
+            Transform gun = RecursiveFindChild(hitTransForm.gameObject.transform, "AKM");
             gun.parent = null;
             rigidbody = gun.gameObject.AddComponent<Rigidbody>();
             rigidbody.AddExplosionForce(700f, new Vector3(hitTransForm.transform.position.x, hitTransForm.transform.position.y - 1, hitTransForm.transform.position.z), 4f);

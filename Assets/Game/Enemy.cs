@@ -23,13 +23,13 @@ public class Enemy : MonoBehaviour {
 	public bool IsHit { get => isHit; set => isHit = value; }
     public float SpeedX { get => speedX; set => speedX = value; }
     public float SpeedZ { get => speedZ; set => speedZ = value; }
+    public GameObject Player { get => player; set => player = value; }
 
     // Use this for initialization
     void Start () {
 		float rotation = (float)(Math.Atan2(SpeedX, SpeedZ) * 180 / Math.PI);
 		transform.Rotate(transform.up, rotation);
 		animator = GetComponent<Animator>();
-		player = GameObject.Find("/Player");
 		soundOuch[0] = GameObject.Find("/Sound/Ouch").GetComponent<AudioSource>();
 		soundOuch[1] = GameObject.Find("/Sound/Ouch2").GetComponent<AudioSource>();
 		soundOuch[2] = GameObject.Find("/Sound/Ouch3").GetComponent<AudioSource>();
@@ -71,7 +71,7 @@ public class Enemy : MonoBehaviour {
 		{
 			timeSinceLastFire = 0;
 			Instantiate(vfxMuzzleFire, spawnFirePosition.position, vfxMuzzleFire.transform.rotation);
-			if (Math.Abs(transform.position.x - player.transform.position.x) < maxDistanceFireAudible && Math.Abs(transform.position.z - player.transform.position.z) < maxDistanceFireAudible)
+			if (Math.Abs(transform.position.x - Player.transform.position.x) < maxDistanceFireAudible && Math.Abs(transform.position.z - Player.transform.position.z) < maxDistanceFireAudible)
             {
 				AudioSource.PlayClipAtPoint(soundGunshot.clip, spawnFirePosition.position);
 			}
@@ -84,7 +84,7 @@ public class Enemy : MonoBehaviour {
 			pos.y = Terrain.activeTerrain.SampleHeight(transform.position) + 0f;
 			transform.position = pos;
 			transform.Translate(new Vector3(SpeedX, 0f, SpeedZ) * Time.deltaTime, Space.World);
-			if (Math.Abs(transform.position.x - player.transform.position.x) > maxDistanceFromPlayer || Math.Abs(transform.position.z - player.transform.position.z) > maxDistanceFromPlayer)
+			if (Math.Abs(transform.position.x - Player.transform.position.x) > maxDistanceFromPlayer || Math.Abs(transform.position.z - Player.transform.position.z) > maxDistanceFromPlayer)
 			{
 				Destroy(gameObject);
 			}
