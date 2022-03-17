@@ -10,14 +10,18 @@ public class Rocket : MonoBehaviour
     private TextMeshProUGUI textScore;
     private Rigidbody myRigidbody;
     private float timeLastSmoke;
-    private Score score;
+    private Player player;
 
     private void Awake()
     {
-        score = GameObject.Find("/Canvas/Score").GetComponent<Score>();
         myRigidbody = GetComponent<Rigidbody>();
         textScore = GameObject.Find("/Canvas/Score").GetComponent<TextMeshProUGUI>();
         soundRocketExplosion = GameObject.Find("/Sound/RocketExplosion").GetComponent<AudioSource>();
+    }
+
+    public void Setup(Player player)
+    {
+        this.player = player;
     }
 
     // Start is called before the first frame update
@@ -46,12 +50,17 @@ public class Rocket : MonoBehaviour
             Vector3 explosionPos = transform.position;
             Collider[] colliders = Physics.OverlapSphere(explosionPos, 15.0f);
 
+            bool somethingHit = false;
             foreach (Collider collider in colliders)
             {
-                if (TransformUtilities.CheckHit(collider.transform, Vector3.zero))
+                if (TransformUtilities.CheckHit(collider.transform, Vector3.zero, player))
                 {
-                    score.IncreaseScore(100);
+                    somethingHit = true;
                 }
+            }
+            if (somethingHit)
+            {
+                player.ShotsHit++;
             }
             soundRocketExplosion.Play();
             Instantiate(vfxHit, transform.position, Quaternion.identity);

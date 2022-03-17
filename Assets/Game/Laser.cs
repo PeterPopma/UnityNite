@@ -6,26 +6,22 @@ public class Laser : MonoBehaviour
     [SerializeField] float lifetime = 3.0f;
     private Transform hitTransForm;
     private Vector3 hitPosition;
-    private Score score;
+    private Player player;
 //    private float previousDistance;
 //    private bool makingHit;
 //    private bool madeHit;
 
-    public void Setup(Transform hitTransForm, Vector3 hitPosition)
+    public void Setup(Transform hitTransForm, Vector3 hitPosition, Player player)
     {
         this.hitTransForm = hitTransForm;
         this.hitPosition = hitPosition;
+        this.player = player;
 
         if (hitTransForm != null && (hitTransForm.GetComponent<Target>() != null || hitTransForm.GetComponent<Enemy>() != null))
         {
 //            previousDistance = Vector3.Distance(transform.position, hitTransForm.position);
 //            makingHit = true;
         }
-    }
-
-    private void Awake()
-    {
-        score = GameObject.Find("/Canvas/Score").GetComponent<Score>();
     }
 
     private void Update()
@@ -58,9 +54,9 @@ public class Laser : MonoBehaviour
         lifetime -= Time.deltaTime;
         if (lifetime < 0f)
         {
-            if (TransformUtilities.CheckHit(hitTransForm, hitPosition))
+            if(TransformUtilities.CheckHit(hitTransForm, hitPosition, player))
             {
-                score.IncreaseScore(100);
+                player.ShotsHit++;
             }
             Destroy(gameObject);
         }

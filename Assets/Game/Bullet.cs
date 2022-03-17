@@ -10,16 +10,17 @@ public class Bullet : MonoBehaviour
     private Vector3 moveDir;
     private Transform hitTransForm;
     private Vector3 hitPosition;
-    private Score score;
+    private Player player;
     private float moveSpeed;
     private float previousDistance;
     private bool makingHit;
     private bool madeHit;
 
-    public void Setup(Transform hitTransForm, Vector3 hitPosition)
+    public void Setup(Transform hitTransForm, Vector3 hitPosition, Player player)
     {
         this.hitPosition = hitPosition;
         this.hitTransForm = hitTransForm;
+        this.player = player;
         if (hitTransForm != null && (hitTransForm.GetComponent<Target>() != null || hitTransForm.GetComponent<Enemy>() != null))
         {
             moveDir = (hitTransForm.position - transform.position).normalized;
@@ -33,12 +34,10 @@ public class Bullet : MonoBehaviour
             makingHit = false;
         }
         moveSpeed = 60f;
-//        renderer = GetComponent<Renderer>();
     }
 
     private void Awake()
     {
-        score = GameObject.Find("/Canvas/Score").GetComponent<Score>();
         bulletVirtualCamera = GameObject.Find("/Cameras/BulletCamera").GetComponent<CinemachineVirtualCamera>();
         bulletVirtualCamera.Priority = 50;
         bulletVirtualCamera.Follow = transform;
@@ -60,12 +59,11 @@ public class Bullet : MonoBehaviour
             {
                 transform.position += moveSpeed * Time.deltaTime * -moveDir;
                 //            Instantiate(vfxHit, targetPosition, Quaternion.identity);
-                if (TransformUtilities.CheckHit(hitTransForm, hitPosition))
+                if (TransformUtilities.CheckHit(hitTransForm, hitPosition, player))
                 {
-                    score.IncreaseScore(100);
+                    player.ShotsHit++;
                 }
                 madeHit = true;
-                //                renderer.enabled = false;
                 bulletVirtualCamera.m_Lens.FieldOfView = 100;
                 CinemachineComponentBase componentBase = bulletVirtualCamera.GetCinemachineComponent(CinemachineCore.Stage.Body);
                 if (componentBase is CinemachineFramingTransposer)

@@ -10,11 +10,11 @@ public class Grenade : MonoBehaviour
     private AudioSource soundGrenadeExplosion;
     private Vector3 axisOfRotation;
     private Rigidbody myRigidbody;
-    private Score score;
+    private Player player;
 
-    private void Awake()
+    public void Setup(Player player)
     {
-        score = GameObject.Find("/Canvas/Score").GetComponent<Score>();
+        this.player = player;
     }
 
     // Start is called before the first frame update
@@ -43,12 +43,17 @@ public class Grenade : MonoBehaviour
             Vector3 explosionPos = transform.position;
             Collider[] colliders = Physics.OverlapSphere(explosionPos, 15.0f);
 
+            bool somethingHit = false;
             foreach (Collider collider in colliders)
             {
-                if (TransformUtilities.CheckHit(collider.transform, Vector3.zero))
+                if(TransformUtilities.CheckHit(collider.transform, Vector3.zero, player))
                 {
-                    score.IncreaseScore(100);
+                    somethingHit = true;
                 }
+            }
+            if (somethingHit)
+            {
+                player.ShotsHit++;
             }
 
             soundGrenadeExplosion.Play();

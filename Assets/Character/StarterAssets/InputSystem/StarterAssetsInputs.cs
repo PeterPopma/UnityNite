@@ -20,6 +20,7 @@ namespace StarterAssets
 		public bool wall;
 		public bool floor;
 		public bool dance;
+		public bool help;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -93,6 +94,11 @@ namespace StarterAssets
 			DanceInput(value.isPressed);
 		}
 
+		public void OnHelp(InputValue value)
+		{
+			HelpInput(value.isPressed);
+		}
+
 #else
 	// old input sys if we do decide to have it (most likely wont)...
 #endif
@@ -155,6 +161,10 @@ namespace StarterAssets
 		public void DanceInput(bool newDance)
 		{
 			dance = newDance;
+		}
+		public void HelpInput(bool newHelp)
+		{
+			help = newHelp;
 		}
 
 #if !UNITY_IOS || !UNITY_ANDROID

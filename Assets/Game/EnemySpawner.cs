@@ -13,18 +13,20 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] float maxSpeed = 6f;
     System.Random random = new System.Random();
     private GameObject player;
+    private Transform enemies;
 
     public GameObject Player { get => player; set => player = value; }
 
     void Start()
     {
+        enemies = GameObject.Find("/Enemies").transform;
         StartCoroutine(spawnTargets());
     }
     private IEnumerator spawnTargets()
     {
         while (true)
         {
-            if (player != null)
+            if (GameManager.Instance.gameState.Equals(GameState.Game) && player != null)
             {
                 float x, z;
                 float distanceX = minDistance + UnityEngine.Random.value * maxDistance;
@@ -47,7 +49,8 @@ public class EnemySpawner : MonoBehaviour
                 {
                     Vector3 spawnLocation = new Vector3(x, 0, z);
                     spawnLocation.y = Terrain.activeTerrain.SampleHeight(spawnLocation);
-                    GameObject spawned = Instantiate(enemyPrefab, spawnLocation, Quaternion.identity) as GameObject;
+                    GameObject spawned = Instantiate(enemyPrefab, spawnLocation, Quaternion.identity);
+                    spawned.transform.parent = enemies;
                     Enemy enemy = spawned.gameObject.GetComponent<Enemy>();
                     enemy.SpeedX = speedX;
                     enemy.SpeedZ = speedZ;

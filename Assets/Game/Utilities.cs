@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -23,20 +24,39 @@ namespace Utilities
             return result;
         }
 
-        public static bool CheckHit(Transform hitTransForm, Vector3 hitPosition, float animationDelay = 0f)
+        public static bool CheckHit(Transform hitTransForm, Vector3 hitPosition, Player player, float animationDelay = 0f)
         {
             if (hitTransForm != null)
             {
                 if (hitTransForm.GetComponent<Target>() != null)
                 {
+                    player.IncreaseScore(5);
                     TargetHit(hitTransForm, hitPosition);
+                    return true;
                 }
                 if (hitTransForm.GetComponent<Enemy>() != null && hitTransForm.gameObject.GetComponent<Rigidbody>() == null)
                 {
+                    player.IncreaseScore(100);
                     EnemyHit(hitTransForm, hitPosition);
                     return true;
                 }
+                Player playerHit = hitTransForm.GetComponent<Player>();
+                if (playerHit != null)
+                {
+                    if (playerHit.PhotonView.IsMine)
+                    {
+                        // Hit myself
+                        playerHit.EliminateMyself();
+                    }
+                    else
+                    {
+                        player.IncreaseKills();
+                        playerHit.PhotonView.RPC("EliminatePlayer", RpcTarget.All, playerHit.PhotonView.ViewID);
+                        return true;
+                    }
+                }
             }
+
             return false;
         }
 

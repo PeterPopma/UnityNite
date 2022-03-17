@@ -5,7 +5,7 @@ using TMPro;
 
 public class FPSDisplay : MonoBehaviour
 {
-    public TextMeshProUGUI fpsText;
+    [SerializeField] TextMeshProUGUI fpsText;
 
     private float pollingTime = 1f;
     private float time;

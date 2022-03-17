@@ -19,6 +19,7 @@ public class Enemy : MonoBehaviour {
 	private float timeSinceLastFire;
 	private float timeSpawn;
 	private bool onGround = false;
+	private Transform enemies;
 
 	public bool IsHit { get => isHit; set => isHit = value; }
     public float SpeedX { get => speedX; set => speedX = value; }
@@ -35,6 +36,7 @@ public class Enemy : MonoBehaviour {
 		soundOuch[2] = GameObject.Find("/Sound/Ouch3").GetComponent<AudioSource>();
 		soundOuch[3] = GameObject.Find("/Sound/Ouch4").GetComponent<AudioSource>();
 		soundGunshot = GameObject.Find("/Sound/Gunshot2").GetComponent<AudioSource>();
+		enemies = GameObject.Find("/Enemies").transform;
 	}
 
 	public void Hit(Vector3 hitPosition)
@@ -70,7 +72,8 @@ public class Enemy : MonoBehaviour {
 		if (timeSinceLastFire >= timeSpawn)
 		{
 			timeSinceLastFire = 0;
-			Instantiate(vfxMuzzleFire, spawnFirePosition.position, vfxMuzzleFire.transform.rotation);
+			Transform muzzleFire = Instantiate(vfxMuzzleFire, spawnFirePosition.position, vfxMuzzleFire.transform.rotation);
+			muzzleFire.parent = enemies;
 			if (Math.Abs(transform.position.x - Player.transform.position.x) < maxDistanceFireAudible && Math.Abs(transform.position.z - Player.transform.position.z) < maxDistanceFireAudible)
             {
 				AudioSource.PlayClipAtPoint(soundGunshot.clip, spawnFirePosition.position);

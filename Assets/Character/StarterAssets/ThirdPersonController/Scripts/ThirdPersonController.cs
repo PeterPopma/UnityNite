@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Photon.Pun;
+using UnityEngine;
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
 using UnityEngine.InputSystem;
 #endif
@@ -88,13 +89,16 @@ namespace StarterAssets
 		private CharacterController _controller;
 		private StarterAssetsInputs _input;
 		private GameObject _mainCamera;
-
+		private PhotonView photonView;
 		private const float _threshold = 0.01f;
 
 		private bool _hasAnimator;
+		public PhotonView PhotonView { get => photonView; set => photonView = value; }
 
 		private void Awake()
 		{
+			photonView = GetComponent<PhotonView>();
+			
 			// get a reference to our main camera
 			if (_mainCamera == null)
 			{
@@ -117,11 +121,14 @@ namespace StarterAssets
 
 		private void Update()
 		{
-			_hasAnimator = TryGetComponent(out _animator);
-			
-			JumpAndGravity();
-			GroundedCheck();
-			Move();
+			if (photonView.IsMine && GameManager.Instance.gameState.Equals(GameState.Game))
+			{
+				_hasAnimator = TryGetComponent(out _animator);
+
+				JumpAndGravity();
+				GroundedCheck();
+				Move();
+			}
 		}
 
 		private void LateUpdate()
