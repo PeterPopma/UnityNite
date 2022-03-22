@@ -32,8 +32,11 @@ public class GameManager : MonoBehaviour
     private EndScreen scriptEndScreen;
     private Animator introAnimator;
     private GameObject player;
+    private Player playerScript;
+    private Title scriptTitle;
 
     public GameObject Player { get => player; set => player = value; }
+    public Player PlayerScript { get => playerScript; set => playerScript = value; }
 
     private void Awake()
     {
@@ -56,6 +59,7 @@ public class GameManager : MonoBehaviour
         imageEndScreen = GameObject.Find("/Canvas/EndScreen/Background").GetComponent<Image>();
         scriptTimeLeft = GameObject.Find("/Canvas/TimeLeft").GetComponent<TimeLeft>();
         scriptEndScreen = GameObject.Find("/Canvas/EndScreen").GetComponent<EndScreen>();
+        scriptTitle = GameObject.Find("/Canvas/Title").GetComponent<Title>();
         aimVirtualCamera = GameObject.Find("/Cameras/AimCamera").GetComponent<CinemachineVirtualCamera>();
         sniperVirtualCamera = GameObject.Find("/Cameras/SniperCamera").GetComponent<CinemachineVirtualCamera>();
         introCamera = GameObject.Find("/Cameras/IntroCamera").GetComponent<CinemachineVirtualCamera>();
@@ -91,8 +95,10 @@ public class GameManager : MonoBehaviour
                 aimVirtualCamera.gameObject.SetActive(true);
                 sniperVirtualCamera.gameObject.SetActive(true);
                 introCamera.gameObject.SetActive(true);
+                scriptTitle.ResetTitle();
                 break;
             case GameState.Game:
+                playerScript.ResetPlayerStats();
                 scriptTimeLeft.InitTimer();
                 textScore.enabled = true;
                 textKills.enabled = true;
@@ -106,11 +112,11 @@ public class GameManager : MonoBehaviour
 
                 // original position: Vector3(19.2399998,38.1899986,89.5899963)
                 //Vector3 spawnLocation = new Vector3(50 * UnityEngine.Random.value - 25, 700, 50 * UnityEngine.Random.value - 25);
-                player.GetComponent<Player>().PlayerDied = false;
-                player.GetComponent<Player>().PlayerHasLanded = false;
+                playerScript.PlayerDied = false;
+                playerScript.PlayerHasLanded = false;
                 Vector3 spawnLocation = new Vector3(1000 * UnityEngine.Random.value - 500, 700, 1000 * UnityEngine.Random.value - 500);
                 player.transform.position = spawnLocation;
-                player.GetComponent<Player>().Animator.SetLayerWeight(6, 0);
+                playerScript.Animator.SetLayerWeight(6, 0);
 
                 scriptTimeLeft.enabled = true;
                 break;
@@ -125,6 +131,7 @@ public class GameManager : MonoBehaviour
                 {
                     Destroy(child.gameObject);
                 }
+                playerScript.PhotonView.RPC("SetFinalScore", RpcTarget.Others, playerScript.PhotonView.ViewID, playerScript.Kills, playerScript.Score, playerScript.ShotsFired, playerScript.ShotsHit, playerScript.DisplayName);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(newGameState), newGameState, null);

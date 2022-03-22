@@ -58,6 +58,7 @@ public class Player : MonoBehaviour
     private Vector3 hitPosition;
     private int score;
     private int kills;
+    private string displayName;
     private Animator animator;
     private float timeLastRunSmoke;
     private float timeLastGrenadeThrow;
@@ -79,16 +80,14 @@ public class Player : MonoBehaviour
     private TextMeshProUGUI textKills;
     private TextMeshProUGUI textHelp;
     private Image backgroundHelp;
-
     private ThirdPersonController thirdPersonController;
     private StarterAssetsInputs starterAssetsInputs;
-
     private TextMeshProUGUI textWeapon;
     private Image imageWeapon;
-
     private PhotonView photonView;
-
+    private Transform hitPoint;
     private static System.Random random = new System.Random();
+    private RigBuilder rigBuilder;
 
     public static string RandomString(int length)
     {
@@ -97,7 +96,6 @@ public class Player : MonoBehaviour
             .Select(s => s[random.Next(s.Length)]).ToArray());
     }
 
-    public string Name { get => name; set => name = value; }
     public int Score { get => score; set => score = value; }
     public PhotonView PhotonView { get => photonView; set => photonView = value; }
     public bool PlayerDied { get => playerDied; set => playerDied = value; }
@@ -105,6 +103,8 @@ public class Player : MonoBehaviour
     public bool PlayerHasLanded { get => playerHasLanded; set => playerHasLanded = value; }
     public int ShotsFired { get => shotsFired; set => shotsFired = value; }
     public int ShotsHit { get => shotsHit; set => shotsHit = value; }
+    public int Kills { get => kills; set => kills = value; }
+    public string DisplayName { get => displayName; set => displayName = value; }
 
     public float GetAccuracy()
     {
@@ -124,7 +124,9 @@ public class Player : MonoBehaviour
         photonView = GetComponent<PhotonView>();
         if (photonView.IsMine)
         {
-            name = RandomString(10);
+            displayName = RandomString(10);
+            hitPoint = gameObject.transform.Find("Character/HitPoint").transform;
+            rigBuilder = gameObject.GetComponent<RigBuilder>();
             textScore = GameObject.Find("/Canvas/Score").GetComponent<TextMeshProUGUI>();
             textKills = GameObject.Find("/Canvas/Kills").GetComponent<TextMeshProUGUI>();
             textHelp = GameObject.Find("/Canvas/Help/Text").GetComponent<TextMeshProUGUI>();
@@ -155,9 +157,9 @@ public class Player : MonoBehaviour
             activeWeapon = 0;
 
             // set cameras to follow this player
-            aimVirtualCamera.Follow = gameObject.transform.Find("PlayerCameraRoot").transform;
-            sniperVirtualCamera.Follow = gameObject.transform.Find("PlayerCameraRoot").transform;
-            playerFollowVirtualCamera.Follow = gameObject.transform.Find("PlayerCameraRoot").transform;
+            aimVirtualCamera.Follow = gameObject.transform.Find("Character/PlayerCameraRoot").transform;
+            sniperVirtualCamera.Follow = gameObject.transform.Find("Character/PlayerCameraRoot").transform;
+            playerFollowVirtualCamera.Follow = gameObject.transform.Find("Character/PlayerCameraRoot").transform;
         }
     }
 
@@ -178,6 +180,39 @@ public class Player : MonoBehaviour
             playerDied = true;
             timeDied = Time.time;
             soundDied.Play();
+        }
+    }
+
+    [PunRPC]
+    public void SetName(int viewID, string name)
+    {
+        if (photonView.ViewID == viewID)
+        {
+            this.name = name;
+        }
+    }
+
+    [PunRPC]
+    public void SetNameAtMe(int viewID, string name)
+    {
+        if (photonView.ViewID != viewID)
+        {
+            photonView.RPC("SetName", RpcTarget.Others, photonView.ViewID, name);
+
+            this.name = name;
+        }
+    }
+
+    [PunRPC]
+    public void SetFinalScore(int viewID, int kills, int score, int shotsFired, int shotsHit, string displayName)
+    {
+        if (photonView.ViewID == viewID)
+        {
+            this.displayName = displayName;
+            this.kills = kills;
+            this.score = score;
+            this.shotsFired = shotsFired;
+            this.shotsHit = shotsHit;
         }
     }
 
@@ -246,6 +281,7 @@ public class Player : MonoBehaviour
                 // we didn't hit anything, so take a point in the direction of the ray
                 hitPosition = ray.GetPoint(300);
             }
+            hitPoint.position = hitPosition;
 
             Vector3 aimLocationXZ = new Vector3(hitPosition.x, hitPosition.y, hitPosition.z);
             aimLocationXZ.y = transform.position.y;
@@ -275,6 +311,7 @@ public class Player : MonoBehaviour
                     {
                         thirdPersonController.SetSensitivity(aimSensitivity);
                         aimVirtualCamera.gameObject.SetActive(true);
+                        rigBuilder.layers[0].active = true;
                     }
                     if (activeWeapon == 0 || activeWeapon == 1 || activeWeapon == 3)
                     {
@@ -302,6 +339,7 @@ public class Player : MonoBehaviour
             {
                 aimRigWeight = 0f;
                 aimVirtualCamera.gameObject.SetActive(false);
+                rigBuilder.layers[0].active = false;
                 sniperVirtualCamera.gameObject.SetActive(false);
                 thirdPersonController.SetSensitivity(normalSensitivity);
                 crosshairAim.enabled = false;
@@ -372,8 +410,8 @@ public class Player : MonoBehaviour
                 animator.Play("Throw", 3, 0f);
                 animator.SetLayerWeight(1, 0f);
                 animator.SetLayerWeight(2, 0f);
-                animator.SetLayerWeight(3, 1f);
-                animator.SetLayerWeight(4, 0f);
+                animator.SetLayerWeight(3, 0f);
+                animator.SetLayerWeight(4, 1f);
                 animator.SetLayerWeight(5, 0f);
                 animator.SetLayerWeight(6, 0f);
                 animator.SetLayerWeight(7, 0f);
@@ -442,7 +480,7 @@ public class Player : MonoBehaviour
             else
             {
                 // back to normal 
-                animator.SetLayerWeight(3, Mathf.Lerp(animator.GetLayerWeight(3), 0f, Time.deltaTime * 10f));
+                animator.SetLayerWeight(4, Mathf.Lerp(animator.GetLayerWeight(4), 0f, Time.deltaTime * 10f));
             }
 
             if (starterAssetsInputs.shoot)
@@ -691,9 +729,20 @@ public class Player : MonoBehaviour
         textScore.text = "Score: " + Score;
     }
 
+    public void ResetPlayerStats()
+    {
+        ShotsFired = 0;
+        ShotsHit = 0;
+        score = 0;
+        kills = 0;
+        textScore.text = "Score: 0";
+        textKills.text = "Kills: 0";
+    }
+
     public void IncreaseKills()
     {
         kills++;
         textKills.text = "Kills: " + kills;
     }
+
 }

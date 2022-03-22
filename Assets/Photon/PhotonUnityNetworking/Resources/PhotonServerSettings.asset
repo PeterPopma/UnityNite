@@ -42,6 +42,9 @@ MonoBehaviour:
   - PlayerDied
   - ChangeClothes
   - EliminatePlayer
+  - SetFinalScore
+  - SetName
+  - SetNameAtMe
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

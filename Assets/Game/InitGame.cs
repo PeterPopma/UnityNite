@@ -28,6 +28,7 @@ public class InitGame : MonoBehaviour
             Player scriptPlayer = player.GetComponent<Player>();
             scriptPlayer.PhotonView.RPC("ChangeClothes", RpcTarget.All, scriptPlayer.PhotonView.ViewID, topClothes, bottomClothes);
             GameManager.Instance.Player = player;
+            GameManager.Instance.PlayerScript = player.GetComponent<Player>();
             GameManager.Instance.UpdateGameState(GameState.Intro);
         }
     }

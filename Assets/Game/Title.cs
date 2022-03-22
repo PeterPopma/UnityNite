@@ -9,14 +9,20 @@ public class Title : MonoBehaviour
     public float delay = 6.4f;
     private Image titleImage;
     private float startingTime;
-    private bool isPlaying = false;
+    private bool isPlaying;
 
     // Start is called before the first frame update
     void Start()
     {
-        startingTime = Time.time;
         titleImage = GetComponent<Image>();
         soundIntro = GameObject.Find("/Sound/Intro").GetComponent<AudioSource>();
+    }
+
+    public void ResetTitle()
+    {
+        startingTime = Time.time;
+        titleImage.enabled = true;
+        isPlaying = false;
     }
 
     // Update is called once per frame
@@ -37,7 +43,7 @@ public class Title : MonoBehaviour
         }
         else if (timePassed > 9f)
         {
-            GameObject.Destroy(this.gameObject);
+            titleImage.enabled = false;
         }
         else
         {

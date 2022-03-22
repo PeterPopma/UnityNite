@@ -51,7 +51,7 @@ namespace Utilities
                     else
                     {
                         player.IncreaseKills();
-                        playerHit.PhotonView.RPC("EliminatePlayer", RpcTarget.All, playerHit.PhotonView.ViewID);
+                        playerHit.PhotonView.RPC("EliminatePlayer", RpcTarget.Others, playerHit.PhotonView.ViewID);
                         return true;
                     }
                 }

@@ -133,7 +133,10 @@ namespace StarterAssets
 
 		private void LateUpdate()
 		{
-			CameraRotation();
+			if (photonView.IsMine && GameManager.Instance.gameState.Equals(GameState.Game))
+			{
+				CameraRotation();
+			}
 		}
 
 		private void AssignAnimationIDs()

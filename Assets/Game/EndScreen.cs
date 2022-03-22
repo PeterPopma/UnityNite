@@ -9,6 +9,9 @@ public class EndScreen : MonoBehaviour
     double startTime; 
     private TextMeshProUGUI textEndScreenTime;
     private TextMeshProUGUI textEndScreen;
+    private string mostKills = "";
+    private string highestScore = "";
+    private string mostAccurate = "";
 
     // Start is called before the first frame update
     void Start()
@@ -24,17 +27,59 @@ public class EndScreen : MonoBehaviour
         {
             return;
         }
+        StartCoroutine(CalculateScores());
         textEndScreen.text = "Game has ended!\n" + "Your accuracy: " + GameManager.Instance.Player.GetComponent<Player>().GetAccuracy().ToString("0.00") + " %\n";
         textEndScreen.text += "\n";
-        textEndScreen.text += "Most kills: \n";
-        textEndScreen.text += "Highest score: \n";
-        textEndScreen.text += "Most accurate player: \n";
-        int timeLeft = (int)(10 - (Time.time - startTime));
+        if (mostKills.Length > 0)
+        {
+            textEndScreen.text += "Most kills: " + mostKills + "\n";
+        }
+        if (highestScore.Length > 0)
+        {
+            textEndScreen.text += "Highest score: " + highestScore + "\n";
+        }
+        if (mostAccurate.Length > 0)
+        {
+            textEndScreen.text += "Most accurate player: " + mostAccurate + "\n";
+        }
+        int timeLeft = (int)(20 - (Time.time - startTime));
         textEndScreenTime.text = "Next game starting in " + timeLeft;
         if(timeLeft < 0)
         {
             ResetGameTime();
             GameManager.Instance.UpdateGameState(GameState.Intro);
+        }
+    }
+
+    IEnumerator CalculateScores()
+    {
+        // Wait some time to send the players scores over the network
+        yield return new WaitForSeconds(3);
+
+        float highest = 0;
+        var players = FindObjectsOfType<Player>();
+        highestScore = "";
+        mostAccurate = "";
+        mostKills = "";
+        foreach (Player player in players)
+        {
+            if(player.Score > highest)
+            {
+                highest = player.Score;
+                highestScore = player.DisplayName + " (" + player.Score.ToString() + ")";
+            }
+            highest = 0;
+            if (player.Kills > highest)
+            {
+                highest = player.Kills;
+                mostKills = player.DisplayName + " (" + player.Kills.ToString() + ")";
+            }
+            highest = 0;
+            if (player.GetAccuracy() > highest)
+            {
+                highest = player.GetAccuracy();
+                mostAccurate = player.DisplayName + " (" + player.GetAccuracy().ToString("0.00") + " %)";
+            }
         }
     }
 
