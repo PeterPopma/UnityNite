@@ -33,10 +33,13 @@ public class GameManager : MonoBehaviour
     private Animator introAnimator;
     private GameObject player;
     private Player playerScript;
-    private Title scriptTitle;
+    private GameObject title;
+    private GameObject welcomeScreen;
+    private string preferredName;
 
     public GameObject Player { get => player; set => player = value; }
     public Player PlayerScript { get => playerScript; set => playerScript = value; }
+    public string PreferredName { get => preferredName; set => preferredName = value; }
 
     private void Awake()
     {
@@ -45,6 +48,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        welcomeScreen = GameObject.Find("/Canvas/WelcomeScreen");
         textScore = GameObject.Find("/Canvas/Score").GetComponent<TextMeshProUGUI>();
         textKills = GameObject.Find("/Canvas/Kills").GetComponent<TextMeshProUGUI>();
         textFrameRate = GameObject.Find("/Canvas/Framerate").GetComponent<TextMeshProUGUI>();
@@ -59,12 +63,12 @@ public class GameManager : MonoBehaviour
         imageEndScreen = GameObject.Find("/Canvas/EndScreen/Background").GetComponent<Image>();
         scriptTimeLeft = GameObject.Find("/Canvas/TimeLeft").GetComponent<TimeLeft>();
         scriptEndScreen = GameObject.Find("/Canvas/EndScreen").GetComponent<EndScreen>();
-        scriptTitle = GameObject.Find("/Canvas/Title").GetComponent<Title>();
+        title = GameObject.Find("/Canvas/Title");
         aimVirtualCamera = GameObject.Find("/Cameras/AimCamera").GetComponent<CinemachineVirtualCamera>();
         sniperVirtualCamera = GameObject.Find("/Cameras/SniperCamera").GetComponent<CinemachineVirtualCamera>();
         introCamera = GameObject.Find("/Cameras/IntroCamera").GetComponent<CinemachineVirtualCamera>();
         introAnimator = introCamera.GetComponent<Animator>();
-        UpdateGameState(GameState.InitGame);
+        UpdateGameState(GameState.SetPlayerName);
     }
 
     public void UpdateGameState(GameState newGameState)
@@ -74,8 +78,11 @@ public class GameManager : MonoBehaviour
         switch (newGameState)
         {
             case GameState.SetPlayerName:
+                introCamera.gameObject.SetActive(false);
+                title.SetActive(false);
                 break;
             case GameState.InitGame:
+                welcomeScreen.SetActive(false);
                 break;
             case GameState.Intro:
                 imageEndScreen.enabled = false;
@@ -95,7 +102,8 @@ public class GameManager : MonoBehaviour
                 aimVirtualCamera.gameObject.SetActive(true);
                 sniperVirtualCamera.gameObject.SetActive(true);
                 introCamera.gameObject.SetActive(true);
-                scriptTitle.ResetTitle();
+                title.SetActive(true);
+                title.GetComponent<Title>().ResetTitle();
                 break;
             case GameState.Game:
                 playerScript.ResetPlayerStats();
@@ -114,13 +122,14 @@ public class GameManager : MonoBehaviour
                 //Vector3 spawnLocation = new Vector3(50 * UnityEngine.Random.value - 25, 700, 50 * UnityEngine.Random.value - 25);
                 playerScript.PlayerDied = false;
                 playerScript.PlayerHasLanded = false;
-                Vector3 spawnLocation = new Vector3(1000 * UnityEngine.Random.value - 500, 700, 1000 * UnityEngine.Random.value - 500);
+                Vector3 spawnLocation = new Vector3(900 * UnityEngine.Random.value - 450, 700, 900 * UnityEngine.Random.value - 450);
                 player.transform.position = spawnLocation;
                 playerScript.Animator.SetLayerWeight(6, 0);
 
                 scriptTimeLeft.enabled = true;
                 break;
             case GameState.Ended:
+                playerScript.PhotonView.RPC("SetFinalScore", RpcTarget.Others, playerScript.PhotonView.ViewID, playerScript.Kills, playerScript.Score, playerScript.ShotsFired, playerScript.ShotsHit, playerScript.DisplayName);
                 scriptTimeLeft.enabled = false;
                 imageEndScreen.enabled = true;
                 textEndScreen.enabled = true;
@@ -131,7 +140,7 @@ public class GameManager : MonoBehaviour
                 {
                     Destroy(child.gameObject);
                 }
-                playerScript.PhotonView.RPC("SetFinalScore", RpcTarget.Others, playerScript.PhotonView.ViewID, playerScript.Kills, playerScript.Score, playerScript.ShotsFired, playerScript.ShotsHit, playerScript.DisplayName);
+                playerScript.EndGame();
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(newGameState), newGameState, null);

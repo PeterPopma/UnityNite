@@ -46,6 +46,9 @@ public class EndScreen : MonoBehaviour
         textEndScreenTime.text = "Next game starting in " + timeLeft;
         if(timeLeft < 0)
         {
+            highestScore = "";
+            mostAccurate = "";
+            mostKills = "";
             ResetGameTime();
             GameManager.Instance.UpdateGameState(GameState.Intro);
         }
@@ -54,13 +57,11 @@ public class EndScreen : MonoBehaviour
     IEnumerator CalculateScores()
     {
         // Wait some time to send the players scores over the network
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(2);
 
         float highest = 0;
         var players = FindObjectsOfType<Player>();
-        highestScore = "";
-        mostAccurate = "";
-        mostKills = "";
+
         foreach (Player player in players)
         {
             if(player.Score > highest)

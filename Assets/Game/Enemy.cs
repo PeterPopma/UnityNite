@@ -74,7 +74,7 @@ public class Enemy : MonoBehaviour {
 			timeSinceLastFire = 0;
 			Transform muzzleFire = Instantiate(vfxMuzzleFire, spawnFirePosition.position, vfxMuzzleFire.transform.rotation);
 			muzzleFire.parent = enemies;
-			if (Math.Abs(transform.position.x - Player.transform.position.x) < maxDistanceFireAudible && Math.Abs(transform.position.z - Player.transform.position.z) < maxDistanceFireAudible)
+			if (Player != null && Math.Abs(transform.position.x - Player.transform.position.x) < maxDistanceFireAudible && Math.Abs(transform.position.z - Player.transform.position.z) < maxDistanceFireAudible)
             {
 				AudioSource.PlayClipAtPoint(soundGunshot.clip, spawnFirePosition.position);
 			}
@@ -87,7 +87,7 @@ public class Enemy : MonoBehaviour {
 			pos.y = Terrain.activeTerrain.SampleHeight(transform.position) + 0f;
 			transform.position = pos;
 			transform.Translate(new Vector3(SpeedX, 0f, SpeedZ) * Time.deltaTime, Space.World);
-			if (Math.Abs(transform.position.x - Player.transform.position.x) > maxDistanceFromPlayer || Math.Abs(transform.position.z - Player.transform.position.z) > maxDistanceFromPlayer)
+			if (Player==null || Math.Abs(transform.position.x - Player.transform.position.x) > maxDistanceFromPlayer || Math.Abs(transform.position.z - Player.transform.position.z) > maxDistanceFromPlayer)
 			{
 				Destroy(gameObject);
 			}

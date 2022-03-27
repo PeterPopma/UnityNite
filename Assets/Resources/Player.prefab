@@ -153,7 +153,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MoveSpeed: 4
-  SprintSpeed: 8
+  SprintSpeed: 12
   RotationSmoothTime: 0.12
   SpeedChangeRate: 10
   Sensitivity: 1
@@ -465,21 +465,21 @@ MonoBehaviour:
   m_SynchronizeLayers:
   - SynchronizeType: 2
     LayerIndex: 0
-  - SynchronizeType: 1
+  - SynchronizeType: 2
     LayerIndex: 1
-  - SynchronizeType: 1
+  - SynchronizeType: 2
     LayerIndex: 2
-  - SynchronizeType: 1
+  - SynchronizeType: 2
     LayerIndex: 3
-  - SynchronizeType: 1
+  - SynchronizeType: 2
     LayerIndex: 4
-  - SynchronizeType: 1
+  - SynchronizeType: 2
     LayerIndex: 5
-  - SynchronizeType: 1
+  - SynchronizeType: 2
     LayerIndex: 6
-  - SynchronizeType: 1
+  - SynchronizeType: 2
     LayerIndex: 7
-  - SynchronizeType: 1
+  - SynchronizeType: 2
     LayerIndex: 8
 --- !u!65 &8730811363203233876
 BoxCollider:

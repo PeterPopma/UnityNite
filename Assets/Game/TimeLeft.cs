@@ -28,7 +28,7 @@ public class TimeLeft : MonoBehaviour
             return;
         }
 
-        int timeLeft = (int)(60 - (PhotonNetwork.Time - startTime));
+        int timeLeft = (int)(300 - (PhotonNetwork.Time - startTime));
         textTimeLeft.text = "Time left: " + timeLeft.ToString();
 
         if (timeLeft <= 0)

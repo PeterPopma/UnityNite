@@ -21,7 +21,7 @@ public class Title : MonoBehaviour
     public void ResetTitle()
     {
         startingTime = Time.time;
-        titleImage.enabled = true;
+        titleImage = GetComponent<Image>();
         isPlaying = false;
     }
 
@@ -33,6 +33,7 @@ public class Title : MonoBehaviour
 
         if (timePassed > 2f && !isPlaying)
         {
+            titleImage.enabled = true;
             isPlaying = true;
             soundIntro.Play();
         }

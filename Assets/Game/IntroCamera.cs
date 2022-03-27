@@ -18,6 +18,9 @@ public class IntroCamera : MonoBehaviour
 
     void OnDisable()
     {
-        GameManager.Instance.UpdateGameState(GameState.Game);
+        if (GameManager.Instance.gameState.Equals(GameState.Intro))
+        {
+            GameManager.Instance.UpdateGameState(GameState.Game);
+        }
     }
 }

@@ -9,6 +9,7 @@ using System.Collections;
 using TMPro;
 using Photon.Pun;
 using System.Linq;
+using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
@@ -50,6 +51,7 @@ public class Player : MonoBehaviour
     private AudioSource soundFootstepRight;
     private AudioSource soundLaser;
     private AudioSource soundRocketLauncher;
+    private AudioSource soundSkydive;
     private Image crosshairAim;
     private Image crosshairWalk;
     private CinemachineVirtualCamera aimVirtualCamera;
@@ -72,6 +74,7 @@ public class Player : MonoBehaviour
     private GameObject newBuild;
     private float buildTileSize = 4.0f;
     private bool playerDied = false;
+    private bool skyDivePlaying = false;
     private float timeDied = 0;
     bool playingFootstep = false;
     bool makingLeftFootstep = false;
@@ -88,13 +91,6 @@ public class Player : MonoBehaviour
     private Transform hitPoint;
     private static System.Random random = new System.Random();
     private RigBuilder rigBuilder;
-
-    public static string RandomString(int length)
-    {
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        return new string(Enumerable.Repeat(chars, length)
-            .Select(s => s[random.Next(s.Length)]).ToArray());
-    }
 
     public int Score { get => score; set => score = value; }
     public PhotonView PhotonView { get => photonView; set => photonView = value; }
@@ -124,7 +120,14 @@ public class Player : MonoBehaviour
         photonView = GetComponent<PhotonView>();
         if (photonView.IsMine)
         {
-            displayName = RandomString(10);
+            // take control of the user input by disabling all and then enabling mine
+            var players = FindObjectsOfType<Player>();
+            foreach (Player player in players)
+            {
+                player.GetComponent<PlayerInput>().enabled = false;
+            }
+            GetComponent<PlayerInput>().enabled = true;
+
             hitPoint = gameObject.transform.Find("Character/HitPoint").transform;
             rigBuilder = gameObject.GetComponent<RigBuilder>();
             textScore = GameObject.Find("/Canvas/Score").GetComponent<TextMeshProUGUI>();
@@ -152,6 +155,7 @@ public class Player : MonoBehaviour
             soundFootstepRight = GameObject.Find("/Sound/FootstepRight").GetComponent<AudioSource>();
             soundLaser = GameObject.Find("/Sound/Laser").GetComponent<AudioSource>();
             soundRocketLauncher = GameObject.Find("/Sound/RocketLauncher").GetComponent<AudioSource>();
+            soundSkydive = GameObject.Find("/Sound/Skydive").GetComponent<AudioSource>();
             enemySpawnerScript = GameObject.Find("/Scripts/EnemySpawner").GetComponent<EnemySpawner>();
             enemySpawnerScript.Player = gameObject;
             activeWeapon = 0;
@@ -161,6 +165,19 @@ public class Player : MonoBehaviour
             sniperVirtualCamera.Follow = gameObject.transform.Find("Character/PlayerCameraRoot").transform;
             playerFollowVirtualCamera.Follow = gameObject.transform.Find("Character/PlayerCameraRoot").transform;
         }
+        else
+        {
+            GetComponent<PlayerInput>().actions.Disable();
+            GetComponent<ThirdPersonController>().enabled = false;
+            GetComponent<StarterAssetsInputs>().enabled = false;
+        }
+    }
+
+
+    public void EndGame()
+    {
+        crosshairAim.enabled = false;
+        crosshairWalk.enabled = false;
     }
 
     public void EliminateMyself()
@@ -239,15 +256,22 @@ public class Player : MonoBehaviour
     {
         if (photonView.IsMine && GameManager.Instance.gameState.Equals(GameState.Game))
         {
-//            float yPosition = transform.position.y;
-//            float velocity = Math.Abs(previousYposition - yPosition) / Time.deltaTime;
+            //            float yPosition = transform.position.y;
+            //            float velocity = Math.Abs(previousYposition - yPosition) / Time.deltaTime;
 
             if (!playerHasLanded)
             {
                 animator.SetLayerWeight(8, 1f);
+                if (!skyDivePlaying)
+                {
+                    skyDivePlaying = true;
+                    soundSkydive.Play();
+                }
 
                 if (gameObject.transform.position.y < Terrain.activeTerrain.SampleHeight(gameObject.transform.position) + 5)
                 {
+                    soundSkydive.Stop();
+                    skyDivePlaying = false;
                     gameObject.transform.position = new Vector3(gameObject.transform.position.x, Terrain.activeTerrain.SampleHeight(gameObject.transform.position), gameObject.transform.position.z);
                     playerHasLanded = true;
                     animator.SetLayerWeight(8, 0f);
@@ -262,9 +286,10 @@ public class Player : MonoBehaviour
                 {
                     playerDied = false;
                     playerHasLanded = false;
-                    Vector3 spawnLocation = new Vector3(500 * UnityEngine.Random.value - 250, 700, 500 * UnityEngine.Random.value - 250);
+                    Vector3 spawnLocation = new Vector3(900 * UnityEngine.Random.value - 450, 700, 900 * UnityEngine.Random.value - 450);
                     transform.position = spawnLocation;
                     animator.SetLayerWeight(6, 0);
+                    return;
                 }
             }
 

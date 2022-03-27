@@ -16,7 +16,7 @@ MonoBehaviour:
     AppIdRealtime: dc281e96-e9ab-43ac-a74c-3df044467d7a
     AppIdFusion: 
     AppIdChat: 
-    AppIdVoice: 
+    AppIdVoice: a7b723cf-4264-4af5-8bd9-626502a1e710
     AppVersion: 
     UseNameServer: 1
     FixedRegion: 
@@ -45,6 +45,9 @@ MonoBehaviour:
   - SetFinalScore
   - SetName
   - SetNameAtMe
+  - CantHearYou
+  - ChangeColour
+  - HeresWhy
   DisableAutoOpenWizard: 1
-  ShowSettings: 0
+  ShowSettings: 1
   DevRegionSetOnce: 1

@@ -15,15 +15,16 @@ public class FPSDisplay : MonoBehaviour
     void Update()
     {
         time += Time.deltaTime;
+        frameCount++;
 
-        frameCount ++;
-
-        if(time > pollingTime)
+        if (time > pollingTime)
         {
             int frameRate = Mathf.RoundToInt(frameCount / time);
             fpsText.text = frameRate.ToString() + " FPS";
 
+            // disable to get average framerate
             time -= pollingTime;
+            // disable to get average framerate
             frameCount = 0;
         }
     }
